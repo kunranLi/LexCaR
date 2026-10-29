@@ -1,0 +1,71 @@
+{
+  "n": 50,
+  "n_shifts": 2,
+  "unit_prices_cny": {
+    "mcp": 0.25,
+    "llm": 0.005,
+    "jev": 0.002
+  },
+  "avg_round1": {
+    "seconds": 77.9914,
+    "mcp": 3.0,
+    "llm": 4.34,
+    "jev": 19.94,
+    "cost_cny": 0.8116
+  },
+  "avg_path_total": {
+    "lexcar_seconds": 112.1576,
+    "mcp_seconds": 123.356,
+    "latency_saving_sec": 11.1984,
+    "lexcar_refine_seconds": 34.1662,
+    "mcp_refine_seconds": 45.3646,
+    "refine_latency_saving_sec": 11.1984,
+    "lexcar_mcp": 3.0,
+    "mcp_mcp": 9.72,
+    "lexcar_llm": 6.34,
+    "mcp_llm": 9.34,
+    "lexcar_jev": 57.82,
+    "mcp_jev": 19.94,
+    "lexcar_cost_cny": 0.8973,
+    "mcp_cost_cny": 2.5166,
+    "cost_saving_cny": 1.6192,
+    "mcp_calls_saved": 6.72
+  },
+  "per_shift_round": {
+    "R2": {
+      "avg_lexcar_sec": 17.648,
+      "avg_mcp_sec": 21.129,
+      "avg_lexcar_mcp": 0.0,
+      "avg_mcp_mcp": 3.28,
+      "avg_lexcar_llm": 1.0,
+      "avg_mcp_llm": 2.42,
+      "avg_lexcar_jev": 18.94,
+      "avg_mcp_jev": 0.0,
+      "avg_lexcar_cost_cny": 0.0429,
+      "avg_mcp_cost_cny": 0.8321,
+      "avg_P@K_lexcar": 0.598,
+      "avg_P@K_mcp": 0.08,
+      "avg_nDCG_lexcar": 0.8065,
+      "avg_nDCG_mcp": 0.1111,
+      "avg_mcp_pool_recall": 0.161
+    },
+    "R3": {
+      "avg_lexcar_sec": 16.5182,
+      "avg_mcp_sec": 24.2356,
+      "avg_lexcar_mcp": 0.0,
+      "avg_mcp_mcp": 3.44,
+      "avg_lexcar_llm": 1.0,
+      "avg_mcp_llm": 2.58,
+      "avg_lexcar_jev": 18.94,
+      "avg_mcp_jev": 0.0,
+      "avg_lexcar_cost_cny": 0.0429,
+      "avg_mcp_cost_cny": 0.8729,
+      "avg_P@K_lexcar": 0.51,
+      "avg_P@K_mcp": 0.062,
+      "avg_nDCG_lexcar": 0.6948,
+      "avg_nDCG_mcp": 0.0761,
+      "avg_mcp_pool_recall": 0.1112
+    }
+  },
+  "note": "Path totals = Round1 (shared) + Round2..N system cost (wall-clock seconds included). refine_*_seconds = Round2..N only (interactive wait after the pool exists). Auto-label Jev is reported separately and not added to path totals."
+}

@@ -1,0 +1,4 @@
+﻿session,candidate_pool,refinement_rounds,initial_mcp_calls,lexcar_total_mcp_calls,full_rerun_estimated_mcp_calls,mcp_calls_saved,estimated_mcp_saving_pct,initial_top10_to_rerank_top10_overlap_counts
+session_20261014_114113.json,50,2,4,4,12,8,66.7,4/4
+session_20261014_130038.json,50,2,8,8,24,16,66.7,7/6
+session_20261014_133349.json,33,1,9,9,18,9,50.0,9

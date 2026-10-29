@@ -1,0 +1,40 @@
+# Secrets & local env
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Runtime artifacts
+outputs/session_*.json
+outputs/indexes/
+models/
+*.npz
+
+# Local datasets (obtain separately; see data/lecardv2/README.md)
+data/lecardv2/query.json
+data/lecardv2/candidates.jsonl
+data/lecardv2/candidates/
+
+# Heavy per-query experiment dumps (keep aggregate/summary/figures)
+experiment/results/**/session_*.json
+experiment/results/**/gold_*.json
+experiment/results/**/result_*.json
+experiment/results/**/*.log

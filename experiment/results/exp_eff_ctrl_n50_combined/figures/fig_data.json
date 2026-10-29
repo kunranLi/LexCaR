@@ -1,0 +1,47 @@
+{
+  "exp_dir": "experiment\\results\\exp_eff_ctrl_n50_combined",
+  "n": 50,
+  "controllability": {
+    "LexCaR": [
+      0.474,
+      0.598,
+      0.51
+    ],
+    "traditional agentic retrieval": [
+      0.474,
+      0.08,
+      0.062
+    ]
+  },
+  "cumulative_cost_cny": {
+    "LexCaR": [
+      0.81158,
+      0.85446,
+      0.8973400000000001
+    ],
+    "traditional agentic retrieval": [
+      0.81158,
+      1.64368,
+      2.51658
+    ]
+  },
+  "cumulative_latency_sec": {
+    "LexCaR": [
+      77.9914,
+      95.63940000000001,
+      112.1576
+    ],
+    "traditional agentic retrieval": [
+      77.9914,
+      99.1204,
+      123.35600000000001
+    ]
+  },
+  "figures": {
+    "combined": "fig_combined.png",
+    "controllability": "fig_controllability_rounds.png",
+    "cost": "fig_cost_cumulative.png",
+    "latency": "fig_latency_cumulative.png"
+  },
+  "note": "Controllability = mean P@K vs the round's focus Target Set (anchored on the Round-1 pool). R1 uses Stage2 ranking vs the Round-2 Target Set (shared start). Cost/latency cumulatives = Round1 shared + each system's Round2..k costs."
+}

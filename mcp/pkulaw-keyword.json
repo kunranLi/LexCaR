@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pkulaw-keyword": {
+      "type": "streamableHttp",
+      "url": "https://apim-gateway.pkulaw.com/mcp-case",
+      "headers": {
+        "Authorization": "Bearer ${PKULAW_MCP_TOKEN}"
+      }
+    }
+  }
+}

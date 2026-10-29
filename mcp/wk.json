@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "wk": {
+      "type": "streamableHttp",
+      "url": "https://mcp.wkinfo.com.cn/mcp-servers/integrated/",
+      "headers": {
+        "Authorization": "Bearer ${WK_MCP_TOKEN}"
+      }
+    }
+  }
+}

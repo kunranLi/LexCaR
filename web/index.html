@@ -1,0 +1,1219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LexCaR | User-Centered Legal Case Retrieval with Editable Ranking Criteria</title>
+  <style>
+    :root{--forest:#660874;--deep:#4a1056;--leaf:#e6c86e;--coral:#dd765d;--paper:#f7f3f8;--white:#fff;--ink:#241428;--muted:#6e5a73;--line:#e3d3e8;--soft:#f3e7f6;--serif:"Source Han Serif SC","Noto Serif CJK SC","Songti SC",Georgia,serif;--sans:"Aptos","Segoe UI","Microsoft YaHei",sans-serif}
+    *{box-sizing:border-box}@keyframes rowIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}#ranking tr{animation:rowIn .45s cubic-bezier(.22,.8,.32,1) both}.step-detail{display:block;margin:0 12px 14px;padding:8px 11px;border:1px dashed var(--line);border-left:3px solid var(--forest);border-radius:6px;background:var(--soft);color:var(--deep);font:600 11px/1.55 var(--sans)}.plan-float{position:relative;margin:0 0 16px;padding:12px 14px 10px;height:80px;display:flex;flex-direction:column;border:1px solid #e5d5ea;border-radius:12px;background:linear-gradient(180deg,#ffffffee,#faf6fb);box-shadow:0 10px 28px rgba(74,16,86,.12),0 2px 6px rgba(74,16,86,.06);backdrop-filter:blur(10px);animation:planFloatIn .45s cubic-bezier(.22,.8,.32,1) both;overflow:hidden}@keyframes planFloatIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}.plan-float-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex:none}.plan-float-head b{color:var(--deep);font:600 12px var(--sans)}.plan-float-body{flex:1;min-height:0;overflow:auto;padding-right:2px}.plan-summary{display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;margin:0}.plan-status{display:flex;align-items:center;min-height:28px;color:var(--deep);font:600 12px/1.45 var(--sans);animation:rowIn .28s ease both;overflow:hidden}.plan-status span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}.plan-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--deep);font-size:10px;font-weight:600}.plan-pill em{font-style:normal;color:var(--muted);font-weight:500}.plan-line{margin-top:5px;color:var(--muted);font-size:11px;animation:rowIn .4s ease both}.plan-log{font-family:ui-monospace,Consolas,monospace;font-size:11px;line-height:1.55;color:var(--ink)}.plan-log .pl-row{margin-top:3px;animation:rowIn .35s ease both}.plan-log .pl-dim{color:var(--muted)}.plan-log .pl-skill{color:var(--forest);font-weight:700}.plan-log .pl-mcp{color:var(--deep);font-weight:700}.plan-log .pl-ok{color:#2e7d46}.plan-log .pl-err{color:#b42318}.plan-log .pl-q{color:var(--ink);margin-left:1.2em}.plan-round{margin-top:8px}
+.plan-round-t{display:inline-block;font-size:11px;color:var(--forest);margin-bottom:1px}
+.plan-meta{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.plan-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.plan-mcp{display:inline-block;padding:1px 7px;border-radius:4px;background:var(--soft);border:1px solid var(--line);color:var(--deep);font-weight:600;font-size:10.5px}
+.plan-tool{color:var(--forest);font-weight:600}
+.plan-kind{display:inline-block;padding:0 6px;border-radius:8px;background:#eef4ee;color:var(--forest);font-size:10px}
+.plan-q{margin-top:3px;color:var(--ink);font-size:11.5px;line-height:1.55;word-break:break-word}
+.plan-args{margin-top:3px;display:flex;flex-wrap:wrap;gap:4px}
+.plan-chip{display:inline-block;padding:0 6px;border:1px dashed var(--line);border-radius:4px;color:var(--muted);font-size:10px;word-break:break-word}
+.plan-chip i{font-style:normal;color:var(--deep);margin-right:3px}
+.plan-err{display:block;color:#b42318;margin-top:2px;white-space:pre-wrap}tr.detail-row>td{padding:0 !important;background:#faf5fc;border-top:1px dashed var(--line)}tr.expanded>td{background:#f6ecf9}#pool-section{height:150px;display:flex;flex-direction:column;overflow:hidden}#pool-section>.section-title{flex:none}#pool-section .table-wrap{flex:1;min-height:0;max-height:none;overflow:auto}#pool-section.reranking .table-wrap{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fbf7fc,#f3e7f6);overflow:hidden}.rank-swap{display:flex;flex-direction:column;align-items:center;gap:6px;width:min(420px,92%)}.rank-swap-msg{color:var(--deep);font:600 11px/1.3 var(--sans)}.rank-swap-sub{color:var(--muted);font:10px/1.3 var(--sans);margin-top:-2px}.rank-swap-stage{position:relative;width:100%;height:72px}.rank-card{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 2px 8px rgba(74,16,86,.08);font:11px var(--sans);color:var(--ink)}.rank-card .rc-no{width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:var(--soft);color:var(--forest);font-weight:700;font-size:10px;flex:none}.rank-card .rc-bar{flex:1;height:6px;border-radius:99px;background:linear-gradient(90deg,#e6c86e,#66087433)}.rank-card.c1{animation:rankSwap1 2.2s ease-in-out infinite}.rank-card.c2{animation:rankSwap2 2.2s ease-in-out infinite}.rank-card.c3{animation:rankSwap3 2.2s ease-in-out infinite}@keyframes rankSwap1{0%,12%{transform:translateY(0);z-index:3}38%,52%{transform:translateY(26px);z-index:2}78%,100%{transform:translateY(0);z-index:3}}@keyframes rankSwap2{0%,12%{transform:translateY(26px);z-index:2}38%,52%{transform:translateY(0);z-index:3}78%,100%{transform:translateY(26px);z-index:2}}@keyframes rankSwap3{0%,100%{transform:translateY(52px);z-index:1;opacity:.85}}.table-wrap{max-height:460px}#facts-section{height:100px;display:flex;flex-direction:column;overflow:hidden}#facts-section>.section-title{flex:none;border-bottom:1px solid var(--line)}#facts{flex:1;min-height:0;overflow:auto}#facts.empty{display:flex;align-items:center;justify-content:center;padding:16px;text-align:center}#facts.analyzing{display:flex;align-items:center;justify-content:center;padding:6px 12px;background:linear-gradient(180deg,#fbf7fc,#f3e7f6)}#facts .facts-bot{display:flex;align-items:center;gap:12px;max-width:100%}#facts .facts-bot-msg{color:var(--deep);font:600 11px/1.35 var(--sans)}#facts .facts-bot-sub{margin-top:2px;color:var(--muted);font:10px/1.3 var(--sans)}.bot-fig{position:relative;width:44px;height:44px;flex:none;animation:botBob 1.2s ease-in-out infinite}.bot-fig svg{display:block;width:100%;height:100%}.bot-scan{position:absolute;left:4px;right:4px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#660874,transparent);animation:botScan 1.4s linear infinite;opacity:.75;pointer-events:none}@keyframes botBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes botScan{0%{top:10px;opacity:.2}40%{opacity:.9}100%{top:34px;opacity:.15}}@keyframes botBlink{0%,42%,48%,100%{transform:scaleY(1)}45%{transform:scaleY(.15)}}.bot-eye{transform-origin:center;animation:botBlink 3.2s ease-in-out infinite}#facts table{min-width:0}#facts th{padding:6px 10px;text-align:left}#facts td{padding:5px 10px;white-space:nowrap}#facts td.fq{max-width:0;width:auto;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}body{margin:0;color:var(--ink);background:var(--paper);background-image:linear-gradient(rgba(102,8,116,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(102,8,116,.035) 1px,transparent 1px);background-size:28px 28px;font:12px var(--sans)}
+    button,input,textarea{font:inherit}button{cursor:pointer}.topbar{min-height:78px;display:flex;align-items:center;justify-content:space-between;padding:13px 3vw;border-bottom:1px solid #d9c5df;background:#ffffffe8;backdrop-filter:blur(14px)}.identity{display:flex;align-items:center;gap:12px}.mark{width:52px;height:52px;border-radius:50%;overflow:hidden;background:transparent}.mark img{display:block;width:100%;height:100%;object-fit:cover}.brand{color:var(--deep);font:600 19px var(--serif)}.kicker,.eyebrow{color:var(--muted);font-size:10px;letter-spacing:.12em}.top-status{display:flex;gap:8px;align-items:center}.pill{padding:6px 10px;border:1px solid var(--line);border-radius:99px;background:#fff;color:var(--muted);font-size:10px}.pill.live{border-color:#c9e2c9;color:#39733e;background:#f5fbf5}.layout{width:min(1660px,100%);height:calc(100vh - 78px);min-height:620px;margin:auto;padding:20px 2.2vw 24px;display:grid;grid-template-columns:205px minmax(520px,1fr) 310px;gap:17px}.panel{min-width:0;min-height:0;overflow:hidden;border:1px solid var(--line);border-radius:9px;background:#fff;box-shadow:0 14px 40px #4a105612}.panel-head{padding:17px 19px 15px;border-bottom:1px solid var(--line)}h1,h2,h3,p{margin-top:0}.panel h1{margin:6px 0 0;color:var(--deep);font:600 22px/1.35 var(--serif)}.panel h2{margin:5px 0 0;color:var(--deep);font:600 18px/1.35 var(--serif)}.eyebrow{color:var(--forest);font-weight:700;text-transform:uppercase}.steps{padding:18px 12px}.step{display:flex;gap:10px;padding:12px 10px;border-left:2px solid var(--line);color:var(--muted)}.step.active{border-color:var(--forest);color:var(--deep);background:var(--soft)}.step.done{border-color:var(--leaf)}.step-no{width:22px;height:22px;display:grid;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:10px;flex:none}.step-title{font-weight:700}.step-note{margin-top:3px;font-size:10px}.sidebar-foot{margin-top:auto;padding:15px;color:var(--muted);font-size:10px;line-height:1.7}.main{display:flex;flex-direction:column;min-height:0}.toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:13px 17px;border-bottom:1px solid var(--line)}.toolbar h2{margin:0}.toolbar select,.toolbar button,.query-box input,.query-box textarea,.weight input{border:1px solid var(--line);border-radius:5px;background:#fdfbfe;color:var(--ink)}.toolbar select,.toolbar button{padding:7px 9px}.toolbar button.primary{border-color:var(--forest);background:var(--forest);color:#fff}.content{overflow:auto;padding:17px}.query-box{display:flex;gap:8px;margin-bottom:14px}.query-box textarea{min-height:64px;resize:vertical;flex:1;padding:10px;line-height:1.6}.query-box button{align-self:stretch;padding:0 14px;border:0;border-radius:5px;background:var(--forest);color:#fff}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px;margin-top:10px}.metric{padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:#fdfbfe}.metric b{display:block;color:var(--deep);font:600 15px var(--serif);line-height:1.2}.metric span{color:var(--muted);font-size:9px}.section{margin-top:15px;border:1px solid var(--line);border-radius:7px;overflow:hidden}.section-title{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:#f9f4fa;border-bottom:1px solid var(--line);color:var(--deep);font:600 14px var(--serif)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:660px}th,td{text-align:left;padding:10px 11px;border-bottom:1px solid #eee4f0;vertical-align:top}th{color:var(--muted);font-size:10px;font-weight:600;white-space:nowrap}td{font-size:11px}tr:hover td{background:#fdf9fe}.rank{color:var(--forest);font-weight:700}.score{font-weight:700;color:var(--deep)}.link{border:0;background:none;color:var(--forest);padding:0;text-decoration:underline}.tag{display:inline-block;margin:2px 3px 2px 0;padding:3px 6px;border-radius:3px;background:var(--soft);color:var(--forest);font-size:10px}.v-yes{background:#e6f6ec;color:#1d7a3e}.v-unknown{background:#fdf3e0;color:#a05e03}.v-no{background:#fdeaea;color:#b42318}tr.fr-yes>td:first-child{box-shadow:inset 3px 0 0 #2e9e57}tr.fr-unknown>td:first-child{box-shadow:inset 3px 0 0 #e0a027}tr.fr-no>td:first-child{box-shadow:inset 3px 0 0 #d64545}.btn-loading{opacity:.75;cursor:wait}.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:5px}@keyframes spin{to{transform:rotate(360deg)}}.config-btn{margin-top:14px;width:100%;padding:8px;border:1px dashed var(--line);border-radius:6px;background:#fff;color:var(--muted);font-size:12px;cursor:pointer}.config-btn:hover{color:var(--forest);border-color:var(--forest)}#config-mask,#history-mask{position:fixed;inset:0;background:rgba(30,20,40,.45);z-index:50;display:flex;align-items:center;justify-content:center}#history-modal{background:#fff;border-radius:10px;width:min(720px,94vw);max-height:86vh;overflow:auto;padding:18px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25)}.history-list{display:grid;gap:8px;margin-top:8px}.history-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:#fdfbfe}.history-item .hi-meta{color:var(--muted);font-size:10px;margin-top:3px;line-height:1.5}.history-item .hi-q{color:var(--deep);font:600 12px/1.4 var(--sans);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.history-item .hi-actions{display:flex;flex-direction:column;gap:5px}.history-item .hi-actions a,.history-item .hi-actions button{padding:5px 10px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--forest);font-size:11px;text-decoration:none;cursor:pointer;white-space:nowrap;text-align:center}.history-item .hi-actions a:hover,.history-item .hi-actions button:hover{border-color:var(--forest);background:var(--soft)}.history-item .hi-actions .hi-del{color:#b42318}.history-item .hi-actions .hi-del:hover{border-color:#b42318;background:#fdeaea}#config-modal{background:#fff;border-radius:10px;width:min(660px,92vw);max-height:86vh;overflow:auto;padding:18px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25)}.cm-label{display:block;margin-top:4px;color:var(--muted);font-size:11px}.cm-hint{font-size:10px;color:var(--muted);margin-top:-2px}.cm-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.cm-head button{border:0;background:none;font-size:15px;cursor:pointer;color:var(--muted)}.cm-note{font-size:11px;color:var(--muted);margin-bottom:10px}.cm-sec{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.cm-sec h4{margin:0 0 8px;font-size:13px}.cfg-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px;font-size:12px}.cfg-item .cfg-url{flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cfg-item .cfg-del{border:0;background:none;color:#b42318;cursor:pointer;font-size:11px}.tag-auth{background:#e6f6ec;color:#1d7a3e}.cm-form{display:grid;gap:6px;margin-top:8px}.cm-form input,.cm-form textarea{padding:7px;border:1px solid var(--line);border-radius:5px;font-size:12px;font-family:inherit}.cm-form button{justify-self:start;padding:7px 12px;border:0;border-radius:5px;background:var(--forest);color:#fff;font-size:12px;cursor:pointer}#filter-rules{margin-bottom:7px}#filter-rules .tag{cursor:help}.fr-del{border:0;background:none;color:inherit;font-size:11px;cursor:pointer;padding:0 0 0 3px;line-height:1}#fr-clear{border:0;background:none;color:var(--muted);font-size:11px;cursor:pointer;margin-left:4px}#fr-clear:hover{color:#b42318}.criteria-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.criteria-actions button{padding:7px 10px;border:0;border-radius:5px;background:var(--forest);color:#fff;font-size:12px}.criteria-actions #apply-rerank{background:var(--deep)}.weight{position:relative;padding-right:22px}.weight .dim-del{position:absolute;right:0;top:50%;transform:translateY(-50%);border:0;background:none;color:#b42318;cursor:pointer;font-size:12px;padding:2px}.drawer{display:flex;flex-direction:column;min-height:0}.drawer-body{overflow:auto;padding:15px}.detail-title{font:600 17px/1.45 var(--serif);color:var(--deep)}.muted{color:var(--muted)}.detail-block{margin-top:15px}.detail-block h3{margin-bottom:6px;color:var(--forest);font-size:11px}.detail-block p{line-height:1.75;white-space:pre-wrap}.formula{padding:12px;border:1px solid #decce4;border-radius:6px;background:#fbf7fc;color:var(--deep);font:13px var(--serif);line-height:1.8}.weight{display:grid;grid-template-columns:1fr 52px;align-items:center;gap:7px;margin:10px 0}.weight label{grid-column:1/-1;color:var(--muted);font-size:10px}.weight input{width:100%;padding:5px}.history{padding-left:17px;margin:0;color:var(--muted);line-height:1.8}.empty{padding:30px;text-align:center;color:var(--muted)}@media(max-width:1100px){.layout{grid-template-columns:180px minmax(440px,1fr)}.drawer{display:none}}@media(max-width:760px){.topbar{padding:12px 16px}.layout{display:block;height:auto;padding:12px}.steps{display:flex;overflow:auto}.step{min-width:150px}.sidebar{margin-bottom:12px}.metrics{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="identity"><div class="mark"><img src="/figures/icon1.png" alt="LexCaR logo"></div><div><div class="brand">LexCaR</div><div class="kicker">User-Centered Legal Case Retrieval with Editable Ranking Criteria</div></div></div></header>
+  <main class="layout">
+    <aside class="panel sidebar"><div class="panel-head"><h2>Pipeline</h2></div><div class="steps"><div class="step active" data-step="1"><span class="step-no">01</span><div><div class="step-title">Candidate Pool Construction</div></div></div><div class="step" data-step="2"><span class="step-no">02</span><div><div class="step-title">Issue Discovery & Query Assessment</div></div></div><div class="step" data-step="3"><span class="step-no">03</span><div><div class="step-title">User-Steered Reranking</div></div></div></div><div id="step-detail" class="step-detail" style="display:none"></div><button id="open-config" class="config-btn">⚙ System Settings</button><button id="open-history" class="config-btn" style="margin-top:8px">📁 Retrieval Records</button><button id="lang-toggle" class="config-btn" style="margin-top:8px">中文</button></aside><div id="config-mask" style="display:none"><div id="config-modal"><div class="cm-head"><b>System Settings</b><button id="config-close">✕</button></div><div class="cm-note">Changes take effect on the next live retrieval (hold Shift and click "Analyze" to force a fresh run); config changes invalidate the retrieval cache automatically. Deleting only disables an entry (renamed with a _ prefix) and can be restored manually.</div><div class="cm-sec"><h4 id="h4-system">LLM & Retrieval</h4><div class="cm-form" id="system-form"><label class="cm-label" for="sys-api-key">LLM API Key</label><input id="sys-api-key" type="password" autocomplete="off" placeholder="sk-… (leave blank to keep current)"><div id="sys-api-hint" class="cm-hint"></div><label class="cm-label" for="sys-base-url">API Base URL</label><input id="sys-base-url" placeholder="https://www.dmxapi.cn"><label class="cm-label" for="sys-llm-model">LLM Model</label><input id="sys-llm-model" placeholder="gpt-4o-mini"><label class="cm-label" for="sys-jev-model">Jev Model</label><input id="sys-jev-model" placeholder="jev-1.13.0"><div class="cm-row"><div><label class="cm-label" for="sys-pool-size">Candidate Pool Size</label><input id="sys-pool-size" type="number" min="5" max="500" step="1"></div><div><label class="cm-label" for="sys-max-rounds">Retrieval Rounds</label><input id="sys-max-rounds" type="number" min="1" max="20" step="1"></div></div><div class="cm-row"><div><label class="cm-label" for="sys-top-k">Top-K (Target Count)</label><input id="sys-top-k" type="number" min="1" max="100" step="1"></div><div></div></div><button id="sys-save">Save System Settings</button></div></div><div class="cm-sec"><h4 id="h4-mcp">MCP Case-law Services</h4><div id="mcp-list"></div><div class="cm-form"><label class="cm-label" id="lbl-mcp-json" for="mcp-json">Standard mcpServers JSON</label><textarea id="mcp-json" rows="8" spellcheck="false" placeholder='{
+  "mcpServers": {
+    "my-law-db": {
+      "type": "streamableHttp",
+      "url": "https://example.com/mcp",
+      "headers": { "Authorization": "Bearer ${MY_TOKEN}" }
+    }
+  }
+}'></textarea><div class="cm-row"><input id="mcp-file" type="file" accept=".json,application/json"><button id="mcp-add">Submit MCP JSON</button></div><div class="cm-hint" id="mcp-hint">Paste or upload a Cursor/Claude-style mcpServers JSON file.</div></div></div><div class="cm-sec"><h4 id="h4-skill">Retrieval Skills</h4><div id="skill-list"></div><div class="cm-form"><label class="cm-label" id="lbl-skill-zip" for="skill-zip">Skill zip package</label><input id="skill-zip" type="file" accept=".zip,application/zip"><div class="cm-hint" id="skill-hint">Zip layout: my-skill/SKILL.md (one or more skill folders).</div><button id="skill-add">Upload Skill Zip</button></div></div></div></div>
+    <div id="history-mask" style="display:none"><div id="history-modal"><div class="cm-head"><b id="history-head">Retrieval Records</b><button id="history-close" type="button">✕</button></div><div class="cm-note" id="history-note">Browse past retrieval sessions and download full results as JSON.</div><div id="history-list" class="history-list"></div></div></div>
+    <section class="panel main"><div class="toolbar"><div><h2 id="session-label">WorkSpace</h2></div></div><div class="content"><div class="query-box"><textarea id="query" placeholder="Describe a case to start a full analysis…">黎红春抢劫、潘某1窝藏一审刑事判决书上海市黄浦区人民法院刑事判决书（2019）沪0101刑初808号：上海市黄浦区人民检察院以沪黄检一部刑诉〔2019〕1589号起诉书指控被告人黎红春犯抢劫罪、被告人潘某1犯窝藏罪，于2019年8月23日向本院提起公诉。本院受理后依法组成合议庭，不公开开庭审理了本案。上海市黄浦区人民检察院指派检察员王某出庭支持公诉，被告人黎红春及其辩护人何俊、被告人潘某1及其辩护人胡熙昊到庭参加诉讼。现已审理终结上海市黄浦区人民检察院指控：1998年11月29日，被害人屈某某将被告人黎红春带至住处，被告人黎红春将事先准备的安眠药放入水中给被害人屈某某服用，待屈某某熟睡后，被告人黎红春窃得现金人民币6万元，后与潘某1一起逃离上海。2005年，被告人潘某1出面为黎红春购买户口，变更黎红春的姓名等身份信息，致使黎红春使用“李林”身份长期逃避侦查和通缉。2019年2月14日，被告人黎红春向湖南省临湘市公安局白羊田派出所投案自首，后被告人潘某1被公安机关传唤到案。为证明上述指控，公诉人当庭宣读、出示了被害人陈述，证人证言，公安机关制作的现场勘验笔录及照片、平面图，毒物检验报告，户籍登记资料等相关书证，以及公安机关出具的被告人到案经过等证明材料。公诉机关据此认为，被告人黎红春的行为已构成抢劫罪，数额巨大，且系入户抢劫，应当追究其刑事责任；被告人黎红春系自首，可以减轻处罚。被告人潘某1的行为已构成窝藏罪，情节严重，应当追究其刑事责任。故提请本院审判。庭审中，被告人黎红春对公诉机关指控的犯罪事实、罪名及量刑建议均无异议，当庭表示认罪认罚。其辩护人提出，被告人黎红春系进入被害人住处之后才临时起意抢劫，不属入户抢劫。被告人黎红春主动投案并如实供述罪行，有自首情节，且自愿认罪认罚，并在家属帮助下退赔了全部违法所得，认罪悔罪态度良好，故建议对被告人黎红春减轻处罚。被告人潘某1对起诉指控的基本事实无异议，但辩称其为被告人黎红春办理户口与黎红春抢劫之事无关。其辩护人提出，被告人潘某1到案后能如实供述罪行，且系初犯，故建议对被告人潘某1适用刑法第六十三条第三款之规定，予以从轻处罚。经审理查明：1998年11月29日，被害人屈某某将被告人黎红春带至本市打浦路ＸＸＸ弄ＸＸＸ号ＸＸＸ室的暂住处，而后，被告人黎红春伺机将事先准备的安眠药放入屈某某的饮用水中，致使屈某某饮水后熟睡，被告人黎红春从写字台抽屉内窃得现金人民币6万元后逃离现场。当晚，被告人黎红春和被告人潘某1（时名潘某2，系被告人黎红春丈夫）一同潜逃离沪，先后躲藏于广东省番禺市、湖南省岳阳市等地。2005年，被告人潘某1在明知被告人黎红春涉嫌犯罪的情况下，通过他人在岳阳市岳阳楼区蔡家社区重新办理户口，将黎红春的姓名改为“李林”，同时变更了户籍地、公民身份号码等信息，使被告人黎红春得以长期逃避侦查和通缉。1999年1月25日，原上海市公安局卢湾分局对本案立案侦查并对被告人黎红春发布拘留证。2019年2月14日，被告人黎红春向湖南省临湘市公安局白羊田派出所投案自首，后被告人潘某1被传唤到案。另查明，本案审理期间，被告人黎红春已在家属协助下向本院退赔了全部赃款人民币6万元。上述事实，有以下证据证实：1.被害人屈某某的陈述和辨认笔录，证实其于1998年11月29日晚将被告人黎红春带至住处后，在喝下由被告人黎红春递给的水后昏睡，醒来后发现被告人黎红春已离开，写字台抽屉内的6万元现金及一部松下手机被盗的事实。2.上海市公安局出具的毒物检验报告，证实被害人屈某某饮用的水中检出舒乐安定成分。3.公安机关制作的现场勘查笔录、现场局部平面图及案发现场照片，证实本案案发现场情况。4.证人乔某某的证词，证实1998年11月29日晚，被告人黎红春与潘某2乘坐出租车出逃时曾告诉彭某2，其使用迷魂药将他人迷倒后拿了他人的钱。进而证实被告人潘某1知晓黎红春已涉嫌严重刑事犯罪。5.证人彭某1的证词，证实2005年由潘某1出面为黎红春办理“李林”户籍的事实。6.公安机关的“李林”户籍资料截图，湖南省岳阳市公安局奇家岭派出所回函，“李林”户口簿内页复印件，公安机关出具的工作情况等，证实被告人潘某1为被告人黎红春办理“李林”户籍的事实。7.公安机关出具的抓获经过、羁押证明，证实被告人黎红春、潘某1的到案情况。8.被告人常住人口基本信息，户口注销证明存根，证实被告人黎红春、潘某1的身份情况。9.本院出具的代管款收据，以及分别与被告人黎红春家属、被害人屈某某所作的谈话笔录，证实被告人黎红春家属已退赔赃款6万元，被害人屈某某表示对被告人黎红春可以谅解。上述证据经庭审质证属实，本院予以确认
+经审理查明：1998年11月29日，被害人屈某某将被告人黎红春带至本市打浦路ＸＸＸ弄ＸＸＸ号ＸＸＸ室的暂住处，而后，被告人黎红春伺机将事先准备的安眠药放入屈某某的饮用水中，致使屈某某饮水后熟睡，被告人黎红春从写字台抽屉内窃得现金人民币6万元后逃离现场。当晚，被告人黎红春和被告人潘某1（时名潘某2，系被告人黎红春丈夫）一同潜逃离沪，先后躲藏于广东省番禺市、湖南省岳阳市等地。2005年，被告人潘某1在明知被告人黎红春涉嫌犯罪的情况下，通过他人在岳阳市岳阳楼区蔡家社区重新办理户口，将黎红春的姓名改为“李林”，同时变更了户籍地、公民身份号码等信息，使被告人黎红春得以长期逃避侦查和通缉。1999年1月25日，原上海市公安局卢湾分局对本案立案侦查并对被告人黎红春发布拘留证。2019年2月14日，被告人黎红春向湖南省临湘市公安局白羊田派出所投案自首，后被告人潘某1被传唤到案。另查明，本案审理期间，被告人黎红春已在家属协助下向本院退赔了全部赃款人民币6万元。</textarea><button id="search">Analyze</button></div><div id="plan-box" class="plan-float"><div class="plan-float-head"><b id="plan-title">Agent retrieval</b></div><div id="plan-lines" class="plan-float-body"></div></div><div class="section" id="facts-section"><div class="section-title"><span>Query-Case Assessment <b id="facts-count" class="muted" style="font-weight:400"></b></span></div><div id="facts" class="empty">Structured query-case assessment appears after analysis.</div></div><div class="metrics"><div class="metric"><b id="candidate-count">—</b><span>Candidate Pool</span></div><div class="metric"><b id="ranking-count">—</b><span>After Exclusion</span></div><div class="metric"><b id="dimension-count">—</b><span>Criteria</span></div><div class="metric"><b id="filter-count">—</b><span>Exclusion rules</span></div><div class="metric"><b id="topk-count">—</b><span>Top-K</span></div></div><div class="section" id="pool-section"><div class="section-title"><span id="ranking-title">Candidate Pool</span><span class="muted" id="source-label" style="display:none"></span></div><div class="table-wrap"><table><thead><tr><th>Rank</th><th>Case No. / Title</th><th>Court &amp; Cause</th><th>Scores</th><th>Retrieval</th><th></th></tr></thead><tbody id="ranking"></tbody></table></div></div></div></section>
+    <aside class="panel drawer"><div class="panel-head"><h2>Editable Ranking Criteria</h2></div><div class="drawer-body"><div class="detail-block"><h3>Current Weight Formula</h3><div class="formula" id="formula">score = Σ ŵᵢ · Pᵢ</div><div id="weights"></div></div><div class="detail-block"><h3>Add / Remove Criteria</h3><input id="dimension-input" style="width:100%;padding:7px" placeholder="e.g. emphasize self-surrender"><div class="cm-hint" id="dimension-hint" style="margin-top:4px">Add a ranking criterion in natural language. Remove one with × on its weight row.</div></div><div class="detail-block"><h3>Exclusion rules</h3><div id="filter-rules" style="display:none"></div><input id="filter-input" style="width:100%;padding:7px" placeholder="e.g. exclude administrative cases"><div class="criteria-actions"><button class="primary" id="apply-criteria">Apply Criteria</button><button class="primary" id="apply-rerank">Re-rank</button></div></div></div></aside>
+  </main>
+  <script>
+    // —— i18n：EN / 中文 界面语言切换（检索内容、案情与 LLM 生成内容始终保留原文） ——
+    const UI_I18N = {
+      en: {
+        th_verdict: "Status",
+        m_elements: "Criteria",
+        step3_n: "",
+        step2_n: "",
+        step1_n: "",
+        kicker: "User-Centered Legal Case Retrieval with Editable Ranking Criteria",
+        doc_title: "LexCaR | User-Centered Legal Case Retrieval with Editable Ranking Criteria",
+        eyebrow_workflow: "", workflow: "Pipeline",
+        step1_t: "Candidate Pool Construction",
+        step2_t: "Issue Discovery & Query Assessment",
+        step3_t: "User-Steered Reranking",
+        btn_config: "⚙ System Settings", btn_history: "📁 Retrieval Records", lang_btn: "中文",
+        history_head: "Retrieval Records",
+        history_note: "Browse past retrieval sessions and download full results as JSON.",
+        history_empty: "No retrieval records yet.",
+        history_download: "Download",
+        history_load: "Load",
+        history_delete: "Delete",
+        history_confirm_del: q => `Delete this retrieval record?\n${q}`,
+        history_meta: (c, d, f) => `${c} candidates · ${d} criteria · ${f} excludes`,
+
+        modal_head: "System Settings",
+        modal_note: "Changes take effect on the next live retrieval (hold Shift and click \"Analyze\" to force a fresh run); config changes invalidate the retrieval cache automatically. Deleting only disables an entry (renamed with a _ prefix) and can be restored manually.",
+        h4_mcp: "MCP Case-law Services", h4_skill: "Retrieval Skills",
+        lbl_mcp_json: "Standard mcpServers JSON",
+        ph_mcp_json: "{\n  \"mcpServers\": { ... }\n}",
+        hint_mcp: "Paste or upload a Cursor/Claude-style mcpServers JSON file.",
+        btn_add_mcp: "Submit MCP JSON",
+        lbl_skill_zip: "Skill zip package",
+        hint_skill: "Zip layout: my-skill/SKILL.md (one or more skill folders).",
+        btn_add_skill: "Upload Skill Zip",
+        mcp_submitted: names => `MCP saved: ${names}`,
+        skill_submitted: names => `Skills installed: ${names}`,
+        pick_skill_zip: "Choose a .zip file first",
+        h4_system: "LLM & Retrieval",
+        lbl_api_key: "LLM API Key",
+        ph_api_key: "sk-… (leave blank to keep current)",
+        hint_api_set: mask => `Current key: ${mask}`,
+        hint_api_unset: "No API key configured yet",
+        lbl_base_url: "API Base URL",
+        lbl_llm_model: "LLM Model",
+        lbl_jev_model: "Jev Model",
+        lbl_pool_size: "Candidate Pool Size",
+        lbl_top_k: "Top-K (Target Count)",
+        lbl_max_rounds: "Retrieval Rounds",
+        btn_save_system: "Save System Settings",
+        sys_saved: "System settings saved. They apply on the next live retrieval.",
+        eyebrow_ws: "", session_label: "WorkSpace",
+        ph_query: "Describe a case to start a full analysis…",
+        btn_analyze: "Analyze", btn_analyzing: "Analyzing…",
+        plan_title_default: "Agent retrieval",
+        plan_skills_label: "Skills",
+        plan_mcp_label: "MCP",
+        plan_status_mcp: name => `${name} tools discovered`,
+        plan_status_skills: names => `Selected skills: ${names}`,
+        plan_status_stage1: (n, mcps) => `Stage1 agent retrieval · target ${n} (MCP: ${mcps})`,
+        plan_status_round: (n, c) => `Round ${n} · ${c} tool call(s)`,
+        plan_status_call: (server, tool) => `${server}/${tool}`,
+        plan_status_pool: (cur, target) => `Candidate pool ${cur} / ${target}`,
+        m_pool: "Candidate Pool", m_after: "After Exclusion", m_elements: "Criteria", m_filters: "Exclusion rules", m_topk: "Top-K",
+        fact_title: "Query-Case Assessment",
+        th_rank: "Rank", th_case: "Case No. / Title", th_court: "Court & Cause", th_weighted: "Scores", th_retrieval: "Retrieval",
+        view: "View",
+        eyebrow_insight: "", panel_head: "Editable Ranking Criteria",
+        h_formula: "Current Weight Formula", h_criteria: "Add / Remove Criteria", h_exclude: "Exclusion rules",
+        ph_filter: "e.g. exclude administrative cases",
+        ph_dimension: "e.g. emphasize self-surrender",
+        hint_dimension: "Add a ranking criterion in natural language. Remove one with × on its weight row.",
+        btn_apply_criteria: "Apply Criteria",
+        btn_rerank: "Re-rank",
+        btn_applying: "Applying…",
+        btn_reranking: "Re-ranking…",
+        remove_dim: "Remove criterion",
+        confirm_del_dim: n => `Remove criterion "${n}"?`,
+        remove_rule: "Remove this rule", clear: "Clear", clear_title: "Clear all filter rules",
+        confirm_clear: "Clear all exclusion filters? (The current ranking stays unchanged)",
+        no_ranking: "No ranking results yet",
+        case_details: "Case Details", cause_charges: "Cause / Charges", facts_h: "Facts", reasoning_h: "Court Reasoning", judgment_h: "Judgment",
+        na: "N/A", select_session: "Select a session",
+        stage3_judging: "Stage 3 · Jev is evaluating candidates on the active criteria and re-ranking with the weighted formula…",
+        th_element: "Legal Issue",
+        th_question: "Jev Question",
+        th_estab: "Established",
+        th_suff: "Sufficiency",
+        unnamed: "Unnamed issue", pending: "pending",
+        facts_empty: "Structured query-case assessment appears after analysis.",
+        facts_analyzing: "LLM is analyzing the query case…",
+        facts_analyzing_sub: "Extracting legal issues and assessing sufficiency",
+        rank_swapping: "Reranking candidate pool…",
+        rank_swapping_sub: "Applying criteria and swapping ranks",
+        facts_count: n => `(${n})`,
+        waiting_elements: "Waiting for legal issues…",
+        title_ranked: "Target Set（Top-K）", title_prelim: "Initial Ranking（Top-K）", title_candidates: "Candidate Pool",
+        preparing: "Preparing this stage\u2019s results…", click_start: "Click Analyze to start",
+        stage1_name: "Stage 1 · Candidate Pool Construction",
+        stage2_name: "Stage 2 · Issue Discovery & Query Assessment",
+        stage3_name: "Stage 3 · User-Steered Reranking",
+        stage1_desc: "The agentic retriever plans case-search queries and calls external case databases through MCP over multiple rounds. Retrieved cases are deduplicated into one reusable candidate pool.",
+        stage2_desc: "Jev first ranks the pool with three preset criteria: legal relation or cause, key-fact overlap, and judicial-outcome reference value. An LLM then extracts atomic legal issues from the top-ranked judgments, and Jev assesses whether each issue is established and sufficiently specified by the query case.",
+        stage3_desc: "Users add or remove ranking criteria, edit their weights, and define exclusion rules. Jev scores the existing pool with the active criteria, and the weighted formula produces a new ranking without external retrieval.",
+        planning: "The agent is planning retrieval queries…",
+        recall_done: "MCP recall complete · candidate cases ingested",
+        stage2_running: "Stage 2 · Discovering legal issues and assessing the query case via Jev (may take tens of seconds)…",
+        wait_search: "Analyzing the case, planning queries and calling MCP to recall cases… (a live retrieval takes tens of seconds)",
+        done_detail: "Analysis complete · inspect the issues, edit criteria or exclusion rules, then re-rank within the same candidate pool.",
+        rerank_done: "Re-ranked · results updated.",
+        wait_render: "Retrieval complete, rendering the demo…",
+        plan_title: (rounds, calls) => `Agent retrieval`,
+        plan_empty: "Waiting for agent retrieval…",
+        plan_round: n => `Round ${n}`,
+        plan_kind_semantic: "semantic", plan_kind_keyword: "keyword",
+        plan_skills: names => `Skill: ${names}`,
+        plan_live: "live MCP retrieval",
+        title_part: v => "title: " + v, fulltext_part: v => "fulltext: " + v,
+        exclude_prefix: "Exclude: ",
+        thr: n => `(threshold ${n})`,
+        token_set: "token set", no_token: "no token", delete_btn: "Delete",
+        no_mcp: "No MCP services configured.", no_skills: "No skills yet.", no_desc: "No description",
+        confirm_del_mcp: n => `Delete MCP service "${n}"?\n(The config file is disabled with a _ prefix; restorable manually)`,
+        confirm_del_skill: n => `Delete skill "${n}"?\n(The skill folder is renamed to disable; restorable manually)`
+      },
+      zh: {
+        kicker: "以用户为中心、可编辑排序标准的法律案例检索",
+        th_verdict: "状态",
+        m_elements: "排序标准",
+        step3_n: "",
+        step2_n: "",
+        step1_n: "",
+        doc_title: "LexCaR｜以用户为中心、可编辑排序标准的法律案例检索",
+        eyebrow_workflow: "", workflow: "流水线",
+        step1_t: "候选池构建",
+        step2_t: "\u6cd5\u5f8b\u95ee\u9898\u53d1\u73b0\u4e0e\u67e5\u8be2\u8bc4\u4f30",
+        step3_t: "\u7528\u6237\u5f15\u5bfc\u91cd\u6392",
+        btn_config: "⚙ 系统设置", btn_history: "📁 检索记录", lang_btn: "English",
+        history_head: "检索记录",
+        history_note: "查看历史检索会话，并可下载完整结果（JSON）。",
+        history_empty: "暂无检索记录。",
+        history_download: "下载",
+        history_load: "载入",
+        history_delete: "删除",
+        history_confirm_del: q => `确认删除该检索记录？\n${q}`,
+        history_meta: (c, d, f) => `${c} 候选 · ${d} 标准 · ${f} 排除`,
+        modal_head: "系统设置",
+        modal_note: "配置变更在下一次真实检索时生效（按住 Shift 点击「开始分析」可强制重跑）；配置变更会自动使检索缓存失效。删除仅停用条目（文件名前加 _ 前缀），可手动恢复。",
+        h4_mcp: "MCP 案例检索服务", h4_skill: "检索技能",
+        lbl_mcp_json: "标准 mcpServers JSON",
+        ph_mcp_json: "{\n  \"mcpServers\": { ... }\n}",
+        hint_mcp: "粘贴或上传 Cursor/Claude 风格的 mcpServers JSON。",
+        btn_add_mcp: "提交 MCP JSON",
+        lbl_skill_zip: "技能压缩包（zip）",
+        hint_skill: "压缩包结构：my-skill/SKILL.md（可含多个技能目录）。",
+        btn_add_skill: "上传技能压缩包",
+        mcp_submitted: names => `MCP 已保存：${names}`,
+        skill_submitted: names => `技能已安装：${names}`,
+        pick_skill_zip: "请先选择 .zip 文件",
+        h4_system: "LLM 与检索参数",
+        lbl_api_key: "LLM API Key",
+        ph_api_key: "sk-…（留空则保留当前密钥）",
+        hint_api_set: mask => `当前密钥：${mask}`,
+        hint_api_unset: "尚未配置 API Key",
+        lbl_base_url: "API Base URL",
+        lbl_llm_model: "LLM 模型",
+        lbl_jev_model: "Jev 模型",
+        lbl_pool_size: "候选池大小",
+        lbl_top_k: "Top-K（目标数量）",
+        lbl_max_rounds: "检索轮次",
+        btn_save_system: "保存系统设置",
+        sys_saved: "系统设置已保存，将在下一次真实检索时生效。",
+        eyebrow_ws: "", session_label: "WorkSpace",
+        ph_query: "输入案情，开始完整分析…",
+        btn_analyze: "开始分析", btn_analyzing: "分析中…",
+        plan_title_default: "智能体检索",
+        plan_skills_label: "调用技能",
+        plan_mcp_label: "MCP",
+        plan_status_mcp: name => `${name} 发现工具`,
+        plan_status_skills: names => `调用技能: ${names}`,
+        plan_status_stage1: (n, mcps) => `Stage1 智能体检索，目标 ${n} 条（已接入: ${mcps}）`,
+        plan_status_round: (n, c) => `第 ${n} 轮 工具调用 ${c} 次`,
+        plan_status_call: (server, tool) => `${server}/${tool}`,
+        plan_status_pool: (cur, target) => `候选池 ${cur} / ${target}`,
+        m_pool: "候选池", m_after: "排除后剩余", m_elements: "排序标准", m_filters: "排除规则", m_topk: "目标数量",
+        fact_title: "查询案件评估",
+        th_rank: "排名", th_case: "案号 / 标题", th_court: "法院与案由", th_weighted: "得分", th_retrieval: "检索得分",
+        view: "查看",
+        eyebrow_insight: "", panel_head: "可编辑排序标准",
+        h_formula: "当前权重公式", h_criteria: "增删排序标准", h_exclude: "排除规则",
+        ph_filter: "例如：排除行政类案件",
+        ph_dimension: "例如：更关注自首情节",
+        hint_dimension: "用自然语言新增排序标准；点击权重行右侧 × 可删除。",
+        btn_apply_criteria: "应用标准",
+        btn_rerank: "重排",
+        btn_applying: "应用中…",
+        btn_reranking: "重排中…",
+        remove_dim: "删除标准",
+        confirm_del_dim: n => `删除排序标准「${n}」？`,
+        remove_rule: "删除该条件", clear: "清空", clear_title: "清空全部排除规则",
+        confirm_clear: "确定清空全部排除规则？（当前排名保持不变）",
+        no_ranking: "暂无排名结果",
+        case_details: "案件详情", cause_charges: "案由 / 罪名", facts_h: "案件事实", reasoning_h: "裁判理由", judgment_h: "判决结果",
+        na: "暂无", select_session: "选择会话",
+        stage3_judging: "Stage 3 · Jev \u6b63\u5728\u4f9d\u636e\u5f53\u524d\u6392\u5e8f\u6807\u51c6\u9010\u6848\u8bc4\u4f30\uff0c\u5e76\u6309\u52a0\u6743\u516c\u5f0f\u91cd\u6392\u2026",
+        th_element: "\u6cd5\u5f8b\u95ee\u9898",
+        th_question: "判定问题",
+        th_estab: "成立度",
+        th_suff: "充分性",
+        unnamed: "未命名法律问题", pending: "待判定",
+        facts_empty: "分析完成后显示结构化查询案件评估。",
+        facts_analyzing: "小机器人正在分析案件…",
+        facts_analyzing_sub: "提取法律要件并评估信息充分性",
+        rank_swapping: "正在调整候选文档顺序…",
+        rank_swapping_sub: "按标准计分并交换排名",
+        facts_count: n => `（${n}）`,
+        waiting_elements: "等待法律问题生成…",
+        title_ranked: "目标集（Top-K）", title_prelim: "初步排名（Top-K）", title_candidates: "候选池",
+        preparing: "正在生成本阶段结果…", click_start: "点击「开始分析」以启动",
+        stage1_name: "Stage 1 · 候选池构建",
+        stage2_name: "Stage 2 · \u6cd5\u5f8b\u95ee\u9898\u53d1\u73b0\u4e0e\u67e5\u8be2\u8bc4\u4f30",
+        stage3_name: "Stage 3 · \u7528\u6237\u5f15\u5bfc\u91cd\u6392",
+        stage1_desc: "\u667a\u80fd\u4f53\u89c4\u5212\u7c7b\u6848\u68c0\u7d22\u67e5\u8be2\uff0c\u901a\u8fc7 MCP \u591a\u8f6e\u8c03\u7528\u5916\u90e8\u6848\u4f8b\u6570\u636e\u5e93\uff0c\u5e76\u6309\u6848\u4ef6\u7f16\u53f7\u53bb\u91cd\uff0c\u6784\u5efa\u4e00\u4e2a\u53ef\u590d\u7528\u7684\u5019\u9009\u6c60\u3002",
+        stage2_desc: "Jev \u5148\u4f7f\u7528\u4e09\u4e2a\u9884\u8bbe\u6807\u51c6\u5bf9\u5019\u9009\u6c60\u8fdb\u884c\u521d\u59cb\u6392\u5e8f\uff1a\u6848\u7531\u6216\u6cd5\u5f8b\u5173\u7cfb\u3001\u5173\u952e\u4e8b\u5b9e\u91cd\u5408\u5ea6\u3001\u88c1\u5224\u7ed3\u679c\u53c2\u8003\u4ef7\u503c\u3002\u968f\u540e\uff0cLLM \u4ece\u9ad8\u6392\u540d\u5224\u51b3\u4e2d\u63d0\u53d6\u539f\u5b50\u6cd5\u5f8b\u95ee\u9898\uff0cJev \u518d\u8bc4\u4f30\u6bcf\u4e2a\u95ee\u9898\u662f\u5426\u5728\u67e5\u8be2\u6848\u4ef6\u4e2d\u6210\u7acb\uff0c\u4ee5\u53ca\u67e5\u8be2\u4fe1\u606f\u662f\u5426\u8db3\u591f\u3002",
+        stage3_desc: "\u7528\u6237\u53ef\u4ee5\u589e\u52a0\u6216\u5220\u9664\u6392\u5e8f\u6807\u51c6\u3001\u8c03\u6574\u6743\u91cd\u5e76\u5b9a\u4e49\u6392\u9664\u89c4\u5219\u3002Jev \u5728\u73b0\u6709\u5019\u9009\u6c60\u4e0a\u6309\u7167\u5f53\u524d\u6807\u51c6\u91cd\u65b0\u8bc4\u5206\uff0c\u901a\u8fc7\u52a0\u6743\u516c\u5f0f\u751f\u6210\u65b0\u6392\u540d\uff0c\u65e0\u9700\u518d\u6b21\u8c03\u7528\u5916\u90e8\u68c0\u7d22\u3002",
+        planning: "智能体正在规划检索式…",
+        recall_done: "MCP 召回完成 · 已载入候选案例",
+        stage2_running: "Stage 2 · \u6b63\u5728\u53d1\u73b0\u6cd5\u5f8b\u95ee\u9898\u5e76\u901a\u8fc7 Jev \u8bc4\u4f30\u67e5\u8be2\u6848\u4ef6\uff08\u53ef\u80fd\u9700\u8981\u6570\u5341\u79d2\uff09\u2026",
+        wait_search: "正在分析案情、规划检索式并调用 MCP 召回案例…（真实检索需数十秒）",
+        done_detail: "\u5206\u6790\u5b8c\u6210 · \u67e5\u770b\u6cd5\u5f8b\u95ee\u9898\uff0c\u7f16\u8f91\u6392\u5e8f\u6807\u51c6\u6216\u6392\u9664\u89c4\u5219\uff0c\u7136\u540e\u5728\u540c\u4e00\u5019\u9009\u6c60\u5185\u91cd\u6392\u3002",
+        rerank_done: "重排完成，结果已更新。",
+        wait_render: "检索完成，正在生成演示…",
+        plan_title: (rounds, calls) => `智能体检索`,
+        plan_empty: "等待智能体检索…",
+        plan_round: n => `第 ${n} 轮`,
+        plan_kind_semantic: "语义检索", plan_kind_keyword: "关键词检索",
+        plan_skills: names => `技能：${names}`,
+        plan_live: "实时 MCP 检索",
+        title_part: v => "标题含「" + v + "」", fulltext_part: v => "全文含「" + v + "」",
+        exclude_prefix: "排除：",
+        thr: n => `(阈值 ${n})`,
+        token_set: "已配置令牌", no_token: "无令牌", delete_btn: "删除",
+        no_mcp: "尚未配置 MCP 服务。", no_skills: "暂无技能。", no_desc: "无描述",
+        confirm_del_mcp: n => `确认删除 MCP 服务「${n}」？\n（配置文件将加 _ 前缀停用，可手动恢复）`,
+        confirm_del_skill: n => `确认删除技能「${n}」？\n（技能文件夹将改名停用，可手动恢复）`
+      }
+    };
+    let UI_LANG = localStorage.getItem("uslecar-lang") === "zh" ? "zh" : "en";
+    function uiT(key, ...args) { const v = UI_I18N[UI_LANG][key]; return typeof v === "function" ? v(...args) : v; }
+    // Agent retrieval 动画文案固定英文（不受界面语言切换影响）
+    function planT(key, ...args) { const v = UI_I18N.en[key]; return typeof v === "function" ? v(...args) : v; }
+    function uiApplyStatic() {
+      document.title = uiT("doc_title");
+      document.documentElement.lang = UI_LANG === "zh" ? "zh-CN" : "en";
+      const set = (sel, key, prop) => { const el = document.querySelector(sel); if (!el) return; if (prop === "placeholder") el.placeholder = uiT(key); else el.textContent = uiT(key); };
+      set(".kicker", "kicker");
+      set(".sidebar .panel-head h2", "workflow");
+      const steps = document.querySelectorAll(".sidebar .step");
+      for (let i = 0; i < steps.length && i < 3; i++) {
+        const p = "step" + (i + 1);
+        const tt = steps[i].querySelector(".step-title"); if (tt) tt.textContent = uiT(p + "_t");
+      }
+      set("#open-config", "btn_config");
+      set("#open-history", "btn_history");
+      set("#lang-toggle", "lang_btn");
+      set("#history-head", "history_head");
+      set("#history-note", "history_note");
+      set("#config-modal .cm-head b", "modal_head");
+      set("#config-modal .cm-note", "modal_note");
+      const setT = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = uiT(key); };
+      setT("h4-system", "h4_system"); setT("h4-mcp", "h4_mcp"); setT("h4-skill", "h4_skill");
+      setT("sys-save", "btn_save_system");
+      [["sys-api-key","ph_api_key"],].forEach(([id,key]) => { const el=document.getElementById(id); if(el) el.placeholder=uiT(key); });
+      const lab = (forId, key) => { const el=document.querySelector('label[for="'+forId+'"]'); if(el) el.textContent=uiT(key); };
+      lab("sys-api-key","lbl_api_key"); lab("sys-base-url","lbl_base_url"); lab("sys-llm-model","lbl_llm_model");
+      lab("sys-jev-model","lbl_jev_model"); lab("sys-pool-size","lbl_pool_size"); lab("sys-max-rounds","lbl_max_rounds"); lab("sys-top-k","lbl_top_k");
+      set("#mcp-add", "btn_add_mcp");
+      set("#skill-add", "btn_add_skill");
+      set("#mcp-json", "ph_mcp_json", "placeholder");
+      const setHint = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = uiT(key); };
+      setHint("mcp-hint", "hint_mcp"); setHint("skill-hint", "hint_skill");
+      const lab2 = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = uiT(key); };
+      lab2("lbl-mcp-json", "lbl_mcp_json"); lab2("lbl-skill-zip", "lbl_skill_zip");
+      set("#session-label", "session_label");
+      set("#query", "ph_query", "placeholder");
+      set("#search", "btn_analyze");
+      // Agent retrieval 标题固定英文
+      const planTitleEl = document.getElementById("plan-title");
+      if (planTitleEl) planTitleEl.textContent = planT("plan_title_default");
+      const ms = document.querySelectorAll(".metrics .metric span");
+      ["m_pool", "m_after", "m_elements", "m_filters", "m_topk"].forEach((k, i) => { if (ms[i]) ms[i].textContent = uiT(k); });
+      const fSpan = document.querySelector("#facts-section .section-title span");
+      if (fSpan && fSpan.firstChild) fSpan.firstChild.nodeValue = uiT("fact_title") + " ";
+      set("#facts", "facts_empty");
+      set("#ranking-title", "title_candidates");
+      const ths = document.querySelectorAll(".table-wrap thead th");
+      ["th_rank", "th_case", "th_court", "th_weighted", "th_retrieval"].forEach((k, i) => { if (ths[i]) ths[i].textContent = uiT(k); });
+      set(".drawer .panel-head h2", "panel_head");
+      const dhs = document.querySelectorAll(".drawer-body .detail-block h3");
+      if (dhs[0]) dhs[0].textContent = uiT("h_formula");
+      if (dhs[1]) dhs[1].textContent = uiT("h_criteria");
+      if (dhs[2]) dhs[2].textContent = uiT("h_exclude");
+      set("#dimension-input", "ph_dimension", "placeholder");
+      set("#dimension-hint", "hint_dimension");
+      set("#filter-input", "ph_filter", "placeholder");
+      set("#apply-criteria", "btn_apply_criteria");
+      set("#apply-rerank", "btn_rerank");
+    }
+    function uiSetLang(lang) {
+      UI_LANG = lang === "zh" ? "zh" : "en";
+      try { localStorage.setItem("uslecar-lang", UI_LANG); } catch (error) {}
+      uiApplyStatic();
+      document.dispatchEvent(new CustomEvent("uslecar-lang"));
+    }
+    (function () {
+      const btn = document.getElementById("lang-toggle");
+      if (btn) btn.onclick = () => uiSetLang(UI_LANG === "zh" ? "en" : "zh");
+      uiApplyStatic();
+    })();
+  </script>
+  <script>
+    const $=s=>document.querySelector(s);let state=null;
+    const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    async function json(url,opt){const r=await fetch(url,opt);const d=await r.json();if(!r.ok)throw Error(d.error||"Request failed");return d}
+    // 两套 UI 脚本共用的过滤缓存维护：规则变化后不得继续回放旧排名。
+    function resetRankingPayload(payload){if(!payload)return payload;const pool=payload.candidate_pool||[];if(pool.length)payload.current_ranking=pool.map((item,i)=>({...item,weighted_score:null,stage2_rank:null,rank:i+1}));return payload}
+    function invalidateRerankCaches(){try{Object.keys(sessionStorage).forEach(key=>{if(key.startsWith("lexdr-rr-"))sessionStorage.removeItem(key)})}catch(error){}}
+    function syncDemoCacheState(payload){
+      if(!payload)return;
+      try{Object.keys(sessionStorage).forEach(key=>{
+        if(!key.startsWith("lexdr-demo-"))return;
+        try{
+          const item=JSON.parse(sessionStorage.getItem(key)||"null"),cached=item&&item.payload;
+          if(!cached)return;
+          const path=payload.session&&payload.session.path,cachedPath=cached.session&&cached.session.path;
+          const sameSession=Boolean(path&&cachedPath===path);
+          const sameQuery=Boolean(payload.query&&String(cached.query||"").trim()===String(payload.query).trim());
+          if(sameSession||sameQuery){item.payload=payload;item.at=Date.now();sessionStorage.setItem(key,JSON.stringify(item))}
+        }catch(error){}
+      })}catch(error){}
+    }
+    function finalizeFilterState(payload){
+      if(!payload)return payload;
+      if(!(payload.filter_rules||[]).length)resetRankingPayload(payload);
+      invalidateRerankCaches();syncDemoCacheState(payload);
+      document.dispatchEvent(new CustomEvent("uslecar-filter-state",{detail:payload}));
+      return payload;
+    }
+    function setStep(n){document.querySelectorAll(".step").forEach((e,i)=>e.classList.toggle("active",i===n-1))}
+    function render(){
+      if(!state)return;const s=state.session||{};$("#query").value=state.query||"";$("#candidate-count").textContent=s.candidate_count??0;const _poolN=(state.candidate_pool||[]).length||s.candidate_count||0;const _rules=state.filter_rules||[];$("#ranking-count").textContent=_rules.length?((state.current_ranking||[]).length||0):_poolN;$("#dimension-count").textContent=s.dimension_count??0;$("#filter-count").textContent=s.filter_count??0;$("#source-label").textContent="";const frEl=document.getElementById("filter-rules"),frules=state.filter_rules||[];frEl.style.display=frules.length?"":"none";frEl.innerHTML=frules.map(r=>`<span class="tag" title="${esc(r.question||"")} ${uiT("thr", Number(r.threshold||0.8).toFixed(2))}">${esc(r.name||r.user_intent||r.id)}<button class="fr-del" data-name="${esc(r.name||r.id)}" title="${uiT("remove_rule")}">×</button></span>`).join("")+`<button id="fr-clear" title="${uiT("clear_title")}">${uiT("clear")}</button>`;frEl.querySelectorAll(".fr-del").forEach(b=>b.onclick=async()=>{try{state=await json("/api/filters/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:state.session.path,name:b.dataset.name})});state=finalizeFilterState(state);render()}catch(e){alert(e.message)}});const frClear=frEl.querySelector("#fr-clear");if(frClear)frClear.onclick=async()=>{if(!frules.length||!confirm(uiT("confirm_clear")))return;try{state=await json("/api/filters/clear",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:state.session.path})});state=finalizeFilterState(state);render()}catch(e){alert(e.message)}};
+      const _topk=Number((document.getElementById("sys-top-k")||{}).value)||0;let rows=state.current_ranking?.length?state.current_ranking:state.stage2_ranked?.length?state.stage2_ranked:state.candidate_pool||[];if(_topk>0&&(state.current_ranking||[]).length)rows=rows.slice(0,_topk);
+      $("#ranking").innerHTML=rows.map((x,i)=>`<tr style="animation-delay:${Math.min(i*45,900)}ms"><td class="rank">${esc(x.rank||x.stage2_rank||x.retrieval_rank||i+1)}</td><td><button class="link case" data-id="${esc(x.doc_id)}">${esc(x.doc_id)}</button><br><span class="muted">${esc(x.title||"")}</span></td><td>${(x.charges||[]).map(c=>`<span class="tag">${esc(c)}</span>`).join("")}<br><span class="muted">${esc(x.court||"")}</span></td><td class="score">${x.weighted_score==null?"—":Number(x.weighted_score).toFixed(3)}</td><td>${x.retrieval_score==null?"—":Number(x.retrieval_score).toFixed(3)}</td><td><button class="link case" data-id="${esc(x.doc_id)}">${uiT("view")}</button></td></tr>`).join("")||`<tr><td colspan="6" class="empty">${uiT("no_ranking")}</td></tr>`;
+      document.querySelectorAll(".case").forEach(b=>b.onclick=()=>showCase(b.dataset.id));
+      const forder={yes:0,unknown:1,no:2};const facts=(state.confirmed_facts||[]).slice().sort((a,b)=>(forder[String(a.verdict||"").toLowerCase()]??1)-(forder[String(b.verdict||"").toLowerCase()]??1));const fcls=v=>{const k=String(v||"").toLowerCase();return forder[k]===undefined?"unknown":k};document.getElementById("facts-section").style.display="";document.getElementById("facts-count").textContent=facts.length?`${uiT("facts_count", facts.length)}`:"";const factsEl=document.getElementById("facts");factsEl.className=facts.length?"":"empty";factsEl.innerHTML=facts.length?`<table><thead><tr><th style="width:24%">${uiT("th_element")}</th><th>${uiT("th_question")}</th><th style="width:70px">${uiT("th_verdict")}</th><th style="width:56px">${uiT("th_estab")}</th><th style="width:56px">${uiT("th_suff")}</th></tr></thead><tbody>${facts.slice(0,18).map((f,i)=>{const k=fcls(f.verdict);return `<tr class="fr-${k}" style="animation:rowIn .4s ease both;animation-delay:${Math.min(i*40,800)}ms"><td><b>${esc(f.name||f.question||uiT("unnamed"))}</b></td><td class="fq">${esc(f.question||"—")}</td><td><span class="tag v-${k}">${esc(f.verdict||f.mark||uiT("pending"))}</span></td><td>${Number(f.established_prob||0).toFixed(2)}</td><td>${Number(f.sufficiency_prob||0).toFixed(2)}</td></tr>`}).join("")}</tbody></table>`:uiT("facts_empty");
+      renderWeights();
+      setStep(state.current_ranking?.some(x=>x.weighted_score!=null)?3:state.confirmed_facts?.length?2:state.candidate_pool?.length?1:1);
+    }
+    function renderWeights(){const ds=state.active_dimensions||[];const sum=ds.reduce((a,d)=>a+Number(d.weight||0),0)||1;$("#weights").innerHTML=ds.map(d=>{const w=Number(d.weight||0),n=w/sum,k=d.name||d.id;return `<div class="weight"><label data-name="${esc(k)}">${esc(k)} · ${(n*100).toFixed(1)}%</label><input type="range" min="0" max="1" step=".05" value="${w}" data-dim="${esc(k)}"><input type="number" min="0" max="1" step=".05" value="${w}" data-dim="${esc(k)}"></div>`}).join("");const updFormula=()=>{const vals={};document.querySelectorAll("#weights input[type=number]").forEach(x=>vals[x.dataset.dim]=Number(x.value));const total=Object.values(vals).reduce((a,v)=>a+v,0)||1;$("#formula").textContent="score = "+Object.entries(vals).map(([k,v])=>`${(v/total).toFixed(3)}·P(${k})`).join(" + ");document.querySelectorAll("#weights .weight").forEach(row=>{const num=Number(row.querySelector("input[type=number]").value)||0;const label=row.querySelector("label");label.textContent=`${label.dataset.name} · ${(num/total*100).toFixed(1)}%`})};document.querySelectorAll("#weights .weight").forEach(row=>{const range=row.querySelector("input[type=range]"),num=row.querySelector("input[type=number]");range.oninput=()=>{num.value=range.value;updFormula()};num.oninput=()=>{const v=Number(num.value);if(!Number.isNaN(v))range.value=Math.min(1,Math.max(0,v));updFormula()}});if(ds.length){updFormula()}else{$("#formula").textContent="score = Σ ŵᵢ · Pᵢ"}}
+    function showCase(id){const c=(state.candidate_pool||[]).find(x=>String(x.doc_id)===String(id))||{};$("#detail").innerHTML=`<div class="detail-title">${esc(c.title||c.doc_id||uiT("case_details"))}</div><div class="muted">${esc(c.doc_id||"")} · ${esc(c.court||"")}</div><div class="detail-block"><h3>${uiT("cause_charges")}</h3><p>${esc((c.charges||[]).join("、")||"—")}</p></div><div class="detail-block"><h3>${uiT("facts_h")}</h3><p>${esc(c.fact||uiT("na"))}</p></div><div class="detail-block"><h3>${uiT("reasoning_h")}</h3><p>${esc(c.reason||uiT("na"))}</p></div><div class="detail-block"><h3>${uiT("judgment_h")}</h3><p>${esc(c.result||uiT("na"))}</p></div>`}
+    async function loadList(){if(!$("#session-select"))return;const d=await json("/api/sessions");$("#session-select").innerHTML='<option value="">' + uiT("select_session") + '</option>'+d.items.map(x=>`<option value="${esc(x.path)}">${esc(x.session_id)} · ${esc((x.query||"").slice(0,28))}</option>`).join("")}
+    async function loadSession(id){if(!id)return;state=await json("/api/session?id="+encodeURIComponent(id));render()}
+    if($("#session-select"))$("#session-select").onchange=e=>loadSession(e.target.value);if($("#refresh"))$("#refresh").onclick=loadList;
+    // 检索与重排仅由下方演示流程绑定，避免双事件重复请求和状态竞争。
+    document.addEventListener("uslecar-filter-state",event=>{if(event.detail){state=event.detail;render()}});
+    loadList().catch(e=>console.error(e));
+  </script>
+  <script>
+    (() => {
+      const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+      let state = null;
+      let phase = 0;
+      const $ = id => document.getElementById(id);
+      const text = (id, value) => { if ($(id)) $(id).textContent = value; };
+      const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+      let showPool = false, showFacts = false, showWeights = false;
+      let factsAnalyzing = false;
+      let rankingAnimating = false;
+      // 仅在用户真正点击 Re-rank 并完成重排后，标题才切到 Re-ranked Results
+      let userReranked = false;
+      const FACTS_BOT_SVG = `<div class="bot-fig" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="18" width="36" height="30" rx="8" fill="#f3e7f6" stroke="#660874" stroke-width="2.5"/><rect x="22" y="8" width="20" height="10" rx="4" fill="#660874"/><circle cx="32" cy="8" r="3" fill="#e6c86e"/><circle class="bot-eye" cx="26" cy="32" r="3.5" fill="#4a1056"/><circle class="bot-eye" cx="38" cy="32" r="3.5" fill="#4a1056" style="animation-delay:.15s"/><path d="M26 42h12" stroke="#660874" stroke-width="2.5" stroke-linecap="round"/><rect x="8" y="26" width="6" height="12" rx="3" fill="#660874"/><rect x="50" y="26" width="6" height="12" rx="3" fill="#660874"/><rect x="20" y="48" width="8" height="6" rx="2" fill="#4a1056"/><rect x="36" y="48" width="8" height="6" rx="2" fill="#4a1056"/></svg><div class="bot-scan"></div></div>`;
+      function factsAnalyzingHtml() {
+        return `<div class="facts-bot">${FACTS_BOT_SVG}<div><div class="facts-bot-msg">${escapeHtml(uiT("facts_analyzing"))}</div><div class="facts-bot-sub">${escapeHtml(uiT("facts_analyzing_sub"))}</div></div></div>`;
+      }
+      function rankingSwapHtml() {
+        return `<div class="rank-swap"><div class="rank-swap-msg">${escapeHtml(uiT("rank_swapping"))}</div><div class="rank-swap-sub">${escapeHtml(uiT("rank_swapping_sub"))}</div><div class="rank-swap-stage" aria-hidden="true"><div class="rank-card c1"><span class="rc-no">1</span><div class="rc-bar"></div></div><div class="rank-card c2"><span class="rc-no">2</span><div class="rc-bar"></div><div class="rank-card c3"><span class="rc-no">3</span><div class="rc-bar"></div></div></div>`;
+      }
+
+      // 不再展示阶段说明文案；进入阶段时只切换左侧 Pipeline 高亮
+      function setStepDetail() {
+        const el = $("step-detail");
+        if (el) { el.textContent = ""; el.style.display = "none"; }
+      }
+      function enterPhase(n) {
+        phase = n;
+        setStep(n);
+        setStepDetail();
+      }
+      // 清规则后后端不重算排名：丢弃残留的 current_ranking，回退为全池无加权展示（0 Jev 消耗）
+      function resetRankingToPool() {
+        if (!state) return;
+        const pool = state.candidate_pool || [];
+        if (!pool.length) return;
+        state.current_ranking = pool.map((item, i) => ({ ...item, weighted_score: null, stage2_rank: null, rank: i + 1 }));
+      }
+      // 规则已空但排名条数少于池大小 → 历史残留排名，同样回退到全池
+      function fixStaleRanking() {
+        if (!state) return;
+        const rules = state.filter_rules || [];
+        const pool = state.candidate_pool || [];
+        const cr = state.current_ranking || [];
+        if (!rules.length && pool.length && cr.length && cr.length < pool.length) resetRankingToPool();
+      }
+      function setStep(current) {
+        document.querySelectorAll(".step").forEach((node, index) => {
+          node.classList.toggle("active", index + 1 === current);
+          node.classList.toggle("done", index + 1 < current);
+        });
+      }
+      function rows() {
+        if (!state) return [];
+        // Query-Case Assessment 未完成前不展示 Initial Ranking，仍显示候选池
+        if (factsAnalyzing) return showPool ? state.candidate_pool || [] : [];
+        if (phase >= 3) {
+          // Re-ranked Results 只展示 Top-K；After Exclusion 指标仍用全量存活池
+          const all = state.current_ranking || [];
+          const k = Number(currentTopK());
+          return Number.isFinite(k) && k > 0 ? all.slice(0, k) : all;
+        }
+        if (phase >= 2) {
+          if ((state.stage2_ranked || []).length) return state.stage2_ranked;
+          if ((state.current_ranking || []).length) {
+            const all = state.current_ranking;
+            const k = Number(currentTopK());
+            return Number.isFinite(k) && k > 0 ? all.slice(0, k) : all;
+          }
+          return showPool ? state.candidate_pool || [] : [];
+        }
+        if (phase >= 1 && showPool) return state.candidate_pool || [];
+        return [];
+      }
+      function renderFacts() {
+        $("facts-section").style.display = "";
+        if (factsAnalyzing) {
+          text("facts-count", "");
+          $("facts").className = "analyzing";
+          $("facts").innerHTML = factsAnalyzingHtml();
+          return;
+        }
+        const raw = phase >= 2 && showFacts ? state.confirmed_facts || [] : [];
+        const order = { yes: 0, unknown: 1, no: 2 };
+        const facts = raw.slice().sort((a, b) => (order[String(a.verdict || "").toLowerCase()] ?? 1) - (order[String(b.verdict || "").toLowerCase()] ?? 1));
+        const cls = v => { const k = String(v || "").toLowerCase(); return order[k] === undefined ? "unknown" : k; };
+        text("facts-count", facts.length ? `${uiT("facts_count", facts.length)}` : "");
+        $("facts").className = facts.length ? "" : "empty";
+        $("facts").innerHTML = facts.length ? `<table><thead><tr><th style="width:24%">${uiT("th_element")}</th><th>${uiT("th_question")}</th><th style="width:70px">${uiT("th_verdict")}</th><th style="width:56px">${uiT("th_estab")}</th><th style="width:56px">${uiT("th_suff")}</th></tr></thead><tbody>${facts.slice(0, 18).map((item, i) => { const k = cls(item.verdict); return `<tr class="fr-${k}" style="animation:rowIn .4s ease both;animation-delay:${Math.min(i * 40, 800)}ms"><td><b>${escapeHtml(item.name || item.question || uiT("unnamed"))}</b></td><td class="fq">${escapeHtml(item.question || "—")}</td><td><span class="tag v-${k}">${escapeHtml(item.verdict || item.mark || uiT("pending"))}</span></td><td>${Number(item.established_prob || 0).toFixed(2)}</td><td>${Number(item.sufficiency_prob || 0).toFixed(2)}</td></tr>`; }).join("")}</tbody></table>` : uiT("facts_empty");
+      }
+      function updateFormula() {
+        const vals = {};
+        document.querySelectorAll("#weights input[type=number]").forEach(input => { vals[input.dataset.dim] = Number(input.value); });
+        if (!Object.keys(vals).length) { $("formula").textContent = "score = Σ ŵᵢ · Pᵢ"; return; }
+        const total = Object.values(vals).reduce((sum, v) => sum + v, 0) || 1;
+        $("formula").textContent = "score = " + Object.entries(vals).map(([key, v]) => `${(v / total).toFixed(3)}·P(${key})`).join(" + ");
+        document.querySelectorAll("#weights .weight").forEach(row => {
+          const num = Number(row.querySelector("input[type=number]").value) || 0;
+          const label = row.querySelector("label");
+          label.textContent = `${label.dataset.name} · ${(num / total * 100).toFixed(1)}%`;
+        });
+      }
+      function collectWeights() {
+        const weights = {};
+        document.querySelectorAll("#weights input[type=number]").forEach(input => {
+          weights[input.dataset.dim] = Number(input.value);
+        });
+        return weights;
+      }
+      async function removeDimension(name) {
+        if (!state || phase < 3 || !name) return;
+        if (!confirm(uiT("confirm_del_dim", name))) return;
+        try {
+          state = await json("/api/dimensions/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: state.session.path, name })
+          });
+          invalidateRerankCaches();
+          syncDemoCacheState(state);
+          render();
+        } catch (error) { alert(error.message); }
+      }
+      function renderWeights() {
+        const dimensions = phase >= 2 && showWeights ? state.active_dimensions || [] : [];
+        const total = dimensions.reduce((sum, item) => sum + Number(item.weight || 0), 0) || 1;
+        $("weights").innerHTML = dimensions.map(item => {
+          const w = Number(item.weight || 0);
+          const name = item.name || item.id;
+          return `<div class="weight"><label data-name="${escapeHtml(name)}">${escapeHtml(name)} · ${(w / total * 100).toFixed(1)}%</label><input type="range" min="0" max="1" step=".05" value="${w}" data-dim="${escapeHtml(name)}"><input type="number" min="0" max="1" step=".05" value="${w}" data-dim="${escapeHtml(name)}"><button type="button" class="dim-del" data-name="${escapeHtml(name)}" title="${escapeHtml(uiT("remove_dim"))}">×</button></div>`;
+        }).join("") || "<div class='empty'>" + uiT("waiting_elements") + "</div>";
+        document.querySelectorAll("#weights .weight").forEach(row => {
+          const range = row.querySelector("input[type=range]");
+          const num = row.querySelector("input[type=number]");
+          const del = row.querySelector(".dim-del");
+          if (range && num) {
+            range.oninput = () => { num.value = range.value; updateFormula(); };
+            num.oninput = () => { const v = Number(num.value); if (!Number.isNaN(v)) range.value = Math.min(1, Math.max(0, v)); updateFormula(); };
+          }
+          if (del) del.onclick = () => removeDimension(del.dataset.name);
+        });
+        if (dimensions.length) updateFormula();
+        else $("formula").textContent = "score = Σ ŵᵢ · Pᵢ";
+      }
+      function caseDetailHtml(item) {
+        return `<div style="padding:12px 15px"><div class="detail-title">${escapeHtml(item.title || item.doc_id || uiT("case_details"))}</div><div class="muted">${escapeHtml(item.doc_id || "")} · ${escapeHtml(item.court || "")}</div><div class="detail-block"><h3>${uiT("cause_charges")}</h3><p>${escapeHtml((item.charges || []).join("、") || "—")}</p></div><div class="detail-block"><h3>${uiT("facts_h")}</h3><p>${escapeHtml(item.fact || uiT("na"))}</p></div><div class="detail-block"><h3>${uiT("reasoning_h")}</h3><p>${escapeHtml(item.reason || uiT("na"))}</p></div><div class="detail-block"><h3>${uiT("judgment_h")}</h3><p>${escapeHtml(item.result || uiT("na"))}</p></div></div>`;
+      }
+      let expandedId = null;
+      function insertDetailRow(tbody, id) {
+        const item = (state.candidate_pool || []).find(c => String(c.doc_id) === String(id)) || {};
+        const detail = document.createElement("tr");
+        detail.className = "detail-row";
+        detail.dataset.for = String(id);
+        detail.innerHTML = `<td colspan="6">${caseDetailHtml(item)}</td>`;
+        const target = [...tbody.querySelectorAll("tr:not(.detail-row)")].find(tr => { const b = tr.querySelector(".demo-case"); return b && String(b.dataset.id) === String(id); });
+        if (target) { target.after(detail); target.classList.add("expanded"); }
+      }
+      function toggleCase(id) {
+        const tbody = $("ranking");
+        const old = tbody.querySelector("tr.detail-row");
+        const prev = old ? old.dataset.for : null;
+        if (old) old.remove();
+        tbody.querySelectorAll("tr.expanded").forEach(tr => tr.classList.remove("expanded"));
+        if (prev === String(id)) { expandedId = null; return; }
+        expandedId = String(id);
+        insertDetailRow(tbody, expandedId);
+      }
+      function restoreExpanded() {
+        const tbody = $("ranking");
+        tbody.querySelectorAll("tr.detail-row").forEach(tr => tr.remove());
+        tbody.querySelectorAll("tr.expanded").forEach(tr => tr.classList.remove("expanded"));
+        if (expandedId) insertDetailRow(tbody, expandedId);
+      }
+      // —— 演示缓存：同一案情重复演示时跳过检索与重排，避免重复消耗 MCP / Jev 调用 ——
+      function hashSig(str) { let h = 5381; for (let i = 0; i < str.length; i += 1) { h = ((h << 5) + h + str.charCodeAt(i)) | 0; } return (h >>> 0).toString(36); }
+      function demoCacheKey(query) { return "lexdr-demo-" + hashSig(query); }
+      function readDemoCache(query) {
+        try { const item = JSON.parse(sessionStorage.getItem(demoCacheKey(query)) || "null"); return item && item.payload ? item.payload : null; } catch (error) { return null; }
+      }
+      function writeDemoCache(query, payload) {
+        try { sessionStorage.setItem(demoCacheKey(query), JSON.stringify({ at: Date.now(), payload })); } catch (error) {}
+      }
+      function rerankSig(sessionPath, weights, filter, rules) {
+        const ruleState = (rules || []).map(rule => [rule.id || "", rule.name || "", rule.question || "", rule.user_intent || "", Number(rule.threshold || 0.8)])
+          .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+        return "lexdr-rr-" + hashSig(sessionPath + "|" + JSON.stringify(weights) + "|" + filter + "|" + JSON.stringify(ruleState));
+      }
+      function readRerankCache(key) { try { return JSON.parse(sessionStorage.getItem(key) || "null"); } catch (error) { return null; } }
+      function writeRerankCache(key, payload) { try { sessionStorage.setItem(key, JSON.stringify(payload)); } catch (error) {} }
+      function filterChipText(rule) {
+        const question = String(rule.question || "").trim().replace(/^该候选案例是否/, "").replace(/[？?。]+$/, "");
+        const intent = String(rule.user_intent || "").trim().replace(/^(不要|不想要|排除|去掉)/, "");
+        const name = String(rule.name || "").trim();
+        const specific = question || intent;
+        return specific ? uiT("exclude_prefix") + specific : (name || String(rule.id || ""));
+      }
+      function renderFilterRules() {
+        const rules = state ? state.filter_rules || [] : [];
+        const el = $("filter-rules");
+        el.style.display = rules.length ? "" : "none";
+        el.innerHTML = rules.map(rule => `<span class="tag" title="${escapeHtml(rule.question || rule.user_intent || "")} ${uiT("thr", Number(rule.threshold || 0.8).toFixed(2))}">${escapeHtml(filterChipText(rule))}<button class="fr-del" data-name="${escapeHtml(rule.id || rule.name || rule.user_intent || "")}" title="${uiT("remove_rule")}">×</button></span>`).join("") + `<button id="fr-clear" title="${uiT("clear_title")}">${uiT("clear")}</button>`;
+        el.querySelectorAll(".fr-del").forEach(button => button.onclick = async () => {
+          try {
+            state = await json("/api/filters/remove", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: state.session.path, name: button.dataset.name})});
+            state = finalizeFilterState(state);
+            render();
+          } catch (error) { alert(error.message); }
+        });
+        const clear = el.querySelector("#fr-clear");
+        if (clear) clear.onclick = async () => {
+          if (!rules.length || !confirm(uiT("confirm_clear"))) return;
+          try {
+            state = await json("/api/filters/clear", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: state.session.path})});
+            state = finalizeFilterState(state);
+            render();
+          } catch (error) { alert(error.message); }
+        };
+      }
+      function afterExclusionCount() {
+        // After Exclusion = 排除规则作用后的剩余池大小，不是展示用的 top-k
+        if (!state || phase < 2) return "—";
+        const poolN = (state.candidate_pool || []).length || (state.session || {}).candidate_count || 0;
+        const rules = state.filter_rules || [];
+        if (!rules.length) return poolN || "—";
+        const kept = (state.current_ranking || []).length;
+        return kept || "—";
+      }
+      function currentTopK() {
+        const el = $("sys-top-k");
+        const n = Number(el && el.value);
+        return Number.isFinite(n) && n > 0 ? n : "—";
+      }
+      function render() {
+        if (!state) {
+          text("candidate-count", "—");
+          text("ranking-count", "—");
+          text("dimension-count", "—");
+          text("filter-count", "—");
+          text("topk-count", currentTopK());
+          text("source-label", "");
+          text("ranking-title", uiT("title_candidates"));
+          const poolSec = $("pool-section");
+          if (poolSec) poolSec.classList.remove("reranking");
+          if ($("ranking")) $("ranking").innerHTML = `<tr><td colspan="6" class="empty">${phase ? uiT("preparing") : uiT("click_start")}</td></tr>`;
+          setStep(phase || 1);
+          return;
+        }
+        const summary = state.session || {};
+        const list = rows();
+        text("candidate-count", showPool || phase >= 2 ? summary.candidate_count : "—");
+        text("ranking-count", afterExclusionCount());
+        text("dimension-count", showWeights && phase >= 2 ? summary.dimension_count : "—");
+        text("filter-count", phase >= 3 ? summary.filter_count : "—");
+        text("topk-count", currentTopK());
+        text("source-label", "");
+        renderFilterRules();
+        text("ranking-title", rankingAnimating || userReranked ? uiT("title_ranked") : (phase >= 2 && !factsAnalyzing) ? uiT("title_prelim") : uiT("title_candidates"));
+        const poolSec = $("pool-section");
+        const wrap = poolSec && poolSec.querySelector(".table-wrap");
+        if (rankingAnimating) {
+          if (poolSec) poolSec.classList.add("reranking");
+          if (wrap) wrap.innerHTML = rankingSwapHtml();
+        } else {
+          if (poolSec) poolSec.classList.remove("reranking");
+          if (wrap && !wrap.querySelector("table")) {
+            wrap.innerHTML = `<table><thead><tr><th>Rank</th><th>Case No. / Title</th><th>Court &amp; Cause</th><th>Scores</th><th>Retrieval</th><th></th></tr></thead><tbody id="ranking"></tbody></table>`;
+            const ths = wrap.querySelectorAll("thead th");
+            ["th_rank", "th_case", "th_court", "th_weighted", "th_retrieval"].forEach((k, i) => { if (ths[i]) ths[i].textContent = uiT(k); });
+          }
+          const rankingEl = $("ranking");
+          if (rankingEl) {
+            rankingEl.innerHTML = list.map((item, index) => `<tr style="animation-delay:${Math.min(index * 45, 900)}ms"><td class="rank">${escapeHtml(item.rank || item.stage2_rank || item.retrieval_rank || index + 1)}</td><td><button class="link demo-case" data-id="${escapeHtml(item.doc_id)}">${escapeHtml(item.doc_id)}</button><br><span class="muted">${escapeHtml(item.title || "")}</span></td><td>${(item.charges || []).map(charge => `<span class="tag">${escapeHtml(charge)}</span>`).join("")}<br><span class="muted">${escapeHtml(item.court || "")}</span></td><td class="score">${item.weighted_score == null ? "—" : Number(item.weighted_score).toFixed(3)}</td><td>${item.retrieval_score == null ? "—" : Number(item.retrieval_score).toFixed(3)}</td><td><button class="link demo-case" data-id="${escapeHtml(item.doc_id)}">${uiT("view")}</button></td></tr>`).join("") || `<tr><td colspan="6" class="empty">${phase ? uiT("preparing") : uiT("click_start")}</td></tr>`;
+            document.querySelectorAll(".demo-case").forEach(button => button.onclick = () => toggleCase(button.dataset.id));
+            restoreExpanded();
+          }
+        }
+        renderFacts();
+        renderWeights();
+        setStep(phase || 1);
+      }
+      function planQueryText(call) {
+        const a = call.arguments || {};
+        const direct = a.text || a.question || a.query || a.keyword || "";
+        if (direct) return String(direct).trim();
+        const parts = [];
+        if (a.accusation) parts.push(String(a.accusation));
+        if (Array.isArray(a.category) && a.category.length) parts.push(a.category.join("/"));
+        if (a.title) parts.push(planT("title_part", a.title));
+        if (a.fulltext) parts.push(planT("fulltext_part", a.fulltext));
+        return [...new Set(parts)].join(" · ");
+      }
+      function planCallKind(call) {
+        const a = call.arguments || {};
+        const blob = String(call.tool || "").toLowerCase() + " " + Object.keys(a).join(" ").toLowerCase();
+        return (blob.includes("keyword") || a.fulltext) ? planT("plan_kind_keyword") : planT("plan_kind_semantic");
+      }
+      function planArgChips(call, skipKeys) {
+        const a = call.arguments || {};
+        return Object.entries(a).filter(([k]) => !skipKeys.has(k)).map(([k, v]) => {
+          const val = Array.isArray(v) ? v.join(" / ") : String(v);
+          return val ? `<span class="plan-chip"><i>${escapeHtml(k)}</i>${escapeHtml(val)}</span>` : "";
+        }).join("");
+      }
+      function collectPlanMeta() {
+        const meta = (state && state.stage1_meta) || {};
+        const plans = meta.plans || [];
+        const skills = meta.skills || [];
+        const mcpSet = [];
+        plans.forEach(round => (round.calls || []).forEach(call => {
+          const s = call.server || "";
+          if (s && !mcpSet.includes(s)) mcpSet.push(s);
+        }));
+        if (!mcpSet.length && state && state.candidate_pool) {
+          (state.candidate_pool || []).forEach(item => {
+            const s = item.source_db || "";
+            if (s && !mcpSet.includes(s)) mcpSet.push(s);
+          });
+        }
+        return { meta, plans, skills, mcpSet };
+      }
+      function buildPlanStatuses() {
+        const { meta, plans, skills, mcpSet } = collectPlanMeta();
+        const statuses = [];
+        mcpSet.forEach(name => statuses.push(planT("plan_status_mcp", name)));
+        if (skills.length) statuses.push(planT("plan_status_skills", skills.join(", ")));
+        const poolTarget = meta.pool_size || (state && state.candidate_pool && state.candidate_pool.length) || 0;
+        if (mcpSet.length || poolTarget) {
+          statuses.push(planT("plan_status_stage1", poolTarget || "—", mcpSet.join(", ") || "—"));
+        }
+        plans.forEach((round, ri) => {
+          const calls = round.calls || [];
+          let count = calls.length;
+          if (!count && (round.semantic_queries || round.keyword_queries)) {
+            count = (round.semantic_queries || []).length + (round.keyword_queries || []).length;
+          }
+          statuses.push(planT("plan_status_round", ri + 1, count));
+          if (calls.length) {
+            calls.forEach(call => {
+              const label = planT("plan_status_call", call.server || "mcp", call.tool || "");
+              const q = planQueryText(call);
+              statuses.push(q ? `${label}  ${q}` : label);
+            });
+          } else {
+            (round.semantic_queries || []).forEach(q => statuses.push(`${planT("plan_kind_semantic")}  ${q}`));
+            (round.keyword_queries || []).forEach(q => statuses.push(`${planT("plan_kind_keyword")}  ${q}`));
+          }
+        });
+        const returned = meta.returned != null ? meta.returned : ((state && state.candidate_pool) || []).length;
+        if (poolTarget || returned) statuses.push(planT("plan_status_pool", returned || 0, poolTarget || returned || 0));
+        return { statuses, skills, mcpSet };
+      }
+      function showPlanStatus(text) {
+        const box = $("plan-box");
+        $("plan-title").textContent = planT("plan_title_default");
+        box.style.display = "";
+        $("plan-lines").innerHTML = `<div class="plan-status"><span>${escapeHtml(text)}</span></div>`;
+      }
+      function showPlanFinal(skills, mcpSet) {
+        const summary = `<div class="plan-summary">`
+          + `<span class="plan-pill"><em>${escapeHtml(planT("plan_skills_label"))}</em>${escapeHtml(skills.length ? skills.join(" · ") : "—")}</span>`
+          + `<span class="plan-pill"><em>${escapeHtml(planT("plan_mcp_label"))}</em>${escapeHtml(mcpSet.length ? mcpSet.join(" · ") : "—")}</span>`
+          + `</div>`;
+        $("plan-title").textContent = planT("plan_title_default");
+        $("plan-box").style.display = "";
+        $("plan-lines").innerHTML = summary;
+      }
+      function renderPlan() {
+        const { statuses, skills, mcpSet } = buildPlanStatuses();
+        if (!statuses.length && !skills.length && !mcpSet.length) return 0;
+        showPlanFinal(skills, mcpSet);
+        return statuses.length || 1;
+      }
+      function resetPlan() {
+        const box = $("plan-box");
+        box.style.display = "";
+        $("plan-title").textContent = planT("plan_title_default");
+        $("plan-lines").innerHTML = `<div class="plan-status" style="animation:none"><span>${escapeHtml(planT("plan_empty"))}</span></div>`;
+      }
+      async function playPlan() {
+        const { statuses, skills, mcpSet } = buildPlanStatuses();
+        if (!statuses.length) {
+          showPlanFinal(skills, mcpSet);
+          return;
+        }
+        for (const status of statuses) {
+          showPlanStatus(status);
+          await pause(380);
+        }
+        showPlanFinal(skills, mcpSet);
+      }
+      async function searchLive(query) {
+        const body = {
+          query,
+          stream: true,
+          pool_size: Number(($("sys-pool-size") || {}).value) || undefined,
+          max_rounds: Number(($("sys-max-rounds") || {}).value) || undefined
+        };
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (!response.ok) {
+          let msg = "Search failed";
+          try { const err = await response.json(); msg = err.error || msg; } catch (error) {}
+          throw new Error(msg);
+        }
+        if (!response.body) throw new Error("Streaming search unsupported");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let payload = null;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let nl;
+          while ((nl = buffer.indexOf("\n")) >= 0) {
+            const line = buffer.slice(0, nl).trim();
+            buffer = buffer.slice(nl + 1);
+            if (!line) continue;
+            let event;
+            try { event = JSON.parse(line); } catch (error) { continue; }
+            if (event.type === "status") showPlanStatus(event.text || "");
+            else if (event.type === "done") payload = event.payload;
+            else if (event.type === "error") throw new Error(event.error || "Search failed");
+          }
+        }
+        if (!payload) throw new Error("Search stream ended without a result");
+        return payload;
+      }
+      function playFinal(payload) {
+        state = payload;
+        writeDemoCache(payload.query || $("query").value.trim(), payload);
+        $("query").value = payload.query || "";
+        showPool = showFacts = showWeights = true;
+        rankingAnimating = false;
+        userReranked = true;
+        enterPhase(3); render();
+      }
+      function setSearchLoading(on) {
+        const btn = $("search");
+        btn.disabled = on;
+        btn.classList.toggle("btn-loading", on);
+        if (on) {
+          btn.dataset.label = btn.textContent;
+          btn.innerHTML = '<span class="spin"></span>' + uiT("btn_analyzing");
+        } else {
+          btn.textContent = btn.dataset.label || uiT("btn_analyze");
+        }
+      }
+      $("search").onclick = async (event) => {
+        const query = $("query").value.trim();
+        if (!query) return;
+        setSearchLoading(true);
+        factsAnalyzing = false;
+        rankingAnimating = false;
+        userReranked = false;
+        resetPlan();
+        showPlanStatus(planT("planning"));
+        enterPhase(1);
+        try {
+          const cached = event.shiftKey ? null : readDemoCache(query);
+          // 仅当缓存已含 Stage2 要件时才走纯回放；缺事实确认则继续走正式流水线
+          if (cached && (cached.confirmed_facts || []).length) {
+            state = cached;
+            // 演示启动即清空遗留的过滤条件（过期缓存可能带旧规则）
+            if ((state.filter_rules || []).length) {
+              try {
+                state = await json("/api/filters/clear", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: state.session.path})});
+                resetRankingToPool();
+                invalidateRerankCaches();
+                writeDemoCache(query, state);
+              } catch (error) {}
+            }
+            fixStaleRanking();
+            $("query").value = state.query || query;
+            showPool = showFacts = showWeights = false;
+            expandedId = null;
+            resetPlan();
+            enterPhase(1); render();
+            await playPlan();
+            showPool = true; render();
+            await pause(1800);
+            // Stage2 回放：评估完成后再展示 Initial Ranking，不自动进入 Stage3
+            showFacts = showWeights = true;
+            enterPhase(2); render();
+            writeDemoCache(query, state);
+            return;
+          }
+          // 复用优先：同 query 的服务端已有会话（含事实确认/要件/排名）直接回放；界面不暴露复用/缓存，模拟真实流程；Shift+点击强制重新检索
+          let session = null, reused = false;
+          try {
+            const list = await json("/api/sessions");
+            const match = (list.items || []).filter(item => String(item.query || "").trim() === query)
+              .sort((a, b) => (b.dimension_count - a.dimension_count) || (b.ranking_count - a.ranking_count) || (b.candidate_count - a.candidate_count))[0];
+            if (match && match.candidate_count) { session = await json("/api/session?id=" + encodeURIComponent(match.path)); reused = true; }
+          } catch (error) {}
+          let streamedLive = false;
+          if (!session) {
+            resetPlan();
+            enterPhase(1); render();
+            showPlanStatus(planT("planning"));
+            session = await searchLive(query);
+            streamedLive = true;
+          }
+          // 每次载入会话都自动清空全部过滤条件，不沿用历史规则
+          if ((session.filter_rules || []).length) {
+            try {
+              session = await json("/api/filters/clear", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: session.session.path})});
+              resetRankingPayload(session);
+              invalidateRerankCaches();
+              syncDemoCacheState(session);
+            } catch (error) {}
+          }
+          state = session;
+          fixStaleRanking();
+          $("query").value = state.query || query;
+          showPool = showFacts = showWeights = false;
+          expandedId = null;
+          enterPhase(1); render();
+          if (streamedLive) {
+            const { skills, mcpSet } = collectPlanMeta();
+            showPlanFinal(skills, mcpSet);
+          } else {
+            resetPlan();
+            await playPlan();
+          }
+          showPool = true; render();
+          // 必须以 confirmed_facts 判断 Stage2 是否已完成；Stage1 的 retrieval score
+          // 不能当作加权重排结果，否则会跳过要件发现与 Query-Case Assessment。
+          const hasStage2 = (state.confirmed_facts || []).length > 0;
+          // Pipeline 进入 Stage2，但 Initial Ranking 等 Query-Case Assessment 结束后再展示
+          enterPhase(2);
+          showFacts = true;
+          showWeights = false;
+          if (!hasStage2) {
+            factsAnalyzing = true;
+            render();
+            const sessionId = state.session && state.session.path;
+            if (!sessionId) throw new Error("Session path missing after Stage 1");
+            try {
+              const stage2Promise = json("/api/stage2", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: sessionId})});
+              state = await stage2Promise;
+              if (!state) throw new Error("Stage 2 returned an empty result");
+              $("query").value = state.query || query;
+            } finally {
+              factsAnalyzing = false;
+            }
+          } else {
+            factsAnalyzing = false;
+            await pause(600);
+          }
+          // Assessment 完成后才展示 Initial Ranking 与可编辑标准；不自动进入 Stage3
+          showWeights = true;
+          enterPhase(2);
+          render();
+          writeDemoCache(query, state);
+        } catch (error) { alert(error.message); }
+        finally { setSearchLoading(false); }
+      };
+      function setBtnLoading(id, on, loadingKey, idleKey) {
+        const btn = $(id);
+        if (!btn) return;
+        btn.disabled = on;
+        btn.classList.toggle("btn-loading", on);
+        if (on) {
+          btn.dataset.label = btn.textContent;
+          btn.innerHTML = '<span class="spin"></span>' + uiT(loadingKey);
+        } else {
+          btn.textContent = btn.dataset.label || uiT(idleKey);
+        }
+      }
+      $("apply-criteria").onclick = async () => {
+        if (!state || phase < 2 || factsAnalyzing) return;
+        setBtnLoading("apply-criteria", true, "btn_applying", "btn_apply_criteria");
+        try {
+          const body = {
+            session_id: state.session.path,
+            weights: collectWeights(),
+            dimension: ($("dimension-input") || {}).value.trim() || "",
+            filter: ($("filter-input") || {}).value.trim() || ""
+          };
+          state = await json("/api/criteria", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          if ($("dimension-input")) $("dimension-input").value = "";
+          if ($("filter-input")) $("filter-input").value = "";
+          invalidateRerankCaches();
+          syncDemoCacheState(state);
+          writeDemoCache(state.query || $("query").value.trim(), state);
+          // 用户开始编辑标准即进入 Stage3 Pipeline；未 Re-rank 前标题仍为 Initial Ranking
+          enterPhase(3);
+          render();
+        } catch (error) { alert(error.message); }
+        finally { setBtnLoading("apply-criteria", false, "btn_applying", "btn_apply_criteria"); }
+      };
+      $("apply-rerank").onclick = async () => {
+        if (!state || phase < 2 || factsAnalyzing) return;
+        setBtnLoading("apply-rerank", true, "btn_reranking", "btn_rerank");
+        enterPhase(3);
+        rankingAnimating = true;
+        render();
+        try {
+          const sig = rerankSig(state.session.path, collectWeights(), "", state.filter_rules);
+          const cached = readRerankCache(sig);
+          if (cached) {
+            await pause(900);
+            playFinal(cached);
+            return;
+          }
+          const payload = await json("/api/rerank", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: state.session.path })
+          });
+          writeRerankCache(sig, payload);
+          playFinal(payload);
+        } catch (error) {
+          rankingAnimating = false;
+          render();
+          alert(error.message);
+        }
+        finally { setBtnLoading("apply-rerank", false, "btn_reranking", "btn_rerank"); }
+      };
+      // —— MCP 与技能配置 ——
+      async function renderConfig() {
+        const data = await json("/api/config");
+        const sys = data.system || {};
+        const apiKey = $("sys-api-key");
+        if (apiKey && document.activeElement !== apiKey) apiKey.value = "";
+        if ($("sys-api-hint")) $("sys-api-hint").textContent = sys.dmx_api_key_set ? uiT("hint_api_set", sys.dmx_api_key_mask || "••••") : uiT("hint_api_unset");
+        if ($("sys-base-url") && document.activeElement !== $("sys-base-url")) $("sys-base-url").value = sys.dmx_base_url || "";
+        if ($("sys-llm-model") && document.activeElement !== $("sys-llm-model")) $("sys-llm-model").value = sys.llm_model || "";
+        if ($("sys-jev-model") && document.activeElement !== $("sys-jev-model")) $("sys-jev-model").value = sys.jev_model || "";
+        if ($("sys-pool-size") && document.activeElement !== $("sys-pool-size")) $("sys-pool-size").value = sys.pool_size ?? 50;
+        if ($("sys-max-rounds") && document.activeElement !== $("sys-max-rounds")) $("sys-max-rounds").value = sys.max_rounds ?? 3;
+        if ($("sys-top-k") && document.activeElement !== $("sys-top-k")) $("sys-top-k").value = sys.top_k ?? 10;
+        text("topk-count", currentTopK());
+        $("mcp-list").innerHTML = data.mcp.length ? data.mcp.map(item => `<div class="cfg-item"><b>${escapeHtml(item.name)}</b><span class="tag ${item.auth ? "tag-auth" : ""}">${item.auth ? uiT("token_set") : uiT("no_token")}</span><span class="cfg-url" title="${escapeHtml(item.url)}">${escapeHtml(item.url)}</span><button class="cfg-del" data-name="${escapeHtml(item.name)}">${uiT("delete_btn")}</button></div>`).join("") : "<div class='empty'>" + uiT("no_mcp") + "</div>";
+        $("skill-list").innerHTML = data.skills.length ? data.skills.map(item => `<div class="cfg-item"><b>${escapeHtml(item.name)}</b><span class="cfg-url" title="${escapeHtml(item.description)}">${escapeHtml(item.description || uiT("no_desc"))}</span><button class="cfg-del" data-name="${escapeHtml(item.name)}">${uiT("delete_btn")}</button></div>`).join("") : "<div class='empty'>" + uiT("no_skills") + "</div>";
+        document.querySelectorAll("#mcp-list .cfg-del").forEach(button => button.onclick = async () => {
+          if (!confirm(uiT("confirm_del_mcp", button.dataset.name))) return;
+          try { await json(`/api/config/mcp?name=${encodeURIComponent(button.dataset.name)}`, {method: "DELETE"}); renderConfig(); }
+          catch (error) { alert(error.message); }
+        });
+        document.querySelectorAll("#skill-list .cfg-del").forEach(button => button.onclick = async () => {
+          if (!confirm(uiT("confirm_del_skill", button.dataset.name))) return;
+          try { await json(`/api/config/skill?name=${encodeURIComponent(button.dataset.name)}`, {method: "DELETE"}); renderConfig(); }
+          catch (error) { alert(error.message); }
+        });
+      }
+      $("open-config").onclick = () => { $("config-mask").style.display = "flex"; renderConfig().catch(error => alert(error.message)); };
+      $("config-close").onclick = () => { $("config-mask").style.display = "none"; };
+      $("config-mask").onclick = event => { if (event.target === $("config-mask")) $("config-mask").style.display = "none"; };
+      async function renderHistory() {
+        const list = $("history-list");
+        if (!list) return;
+        list.innerHTML = "<div class='empty'>…</div>";
+        const data = await json("/api/sessions");
+        const items = data.items || [];
+        if (!items.length) {
+          list.innerHTML = "<div class='empty'>" + uiT("history_empty") + "</div>";
+          return;
+        }
+        list.innerHTML = items.map(item => {
+          const q = String(item.query || "").trim() || item.session_id || item.path;
+          const meta = uiT("history_meta", item.candidate_count || 0, item.dimension_count || 0, item.filter_count || 0);
+          const when = item.created_at || item.session_id || "";
+          const href = "/api/session/download?id=" + encodeURIComponent(item.path);
+          return `<div class="history-item"><div><div class="hi-q" title="${escapeHtml(q)}">${escapeHtml(q)}</div><div class="hi-meta">${escapeHtml(when)} · ${escapeHtml(meta)}</div></div><div class="hi-actions"><a href="${href}" download>${escapeHtml(uiT("history_download"))}</a><button type="button" class="hi-load" data-path="${escapeHtml(item.path)}">${escapeHtml(uiT("history_load"))}</button><button type="button" class="hi-del" data-path="${escapeHtml(item.path)}" data-q="${escapeHtml(q)}">${escapeHtml(uiT("history_delete"))}</button></div></div>`;
+        }).join("");
+        list.querySelectorAll(".hi-load").forEach(button => {
+          button.onclick = async () => {
+            try {
+              const payload = await json("/api/session?id=" + encodeURIComponent(button.dataset.path));
+              state = payload;
+              showPool = showFacts = showWeights = true;
+              factsAnalyzing = false;
+              rankingAnimating = false;
+              userReranked = false;
+              // 载入历史仍显示 Initial Ranking，直到用户在本会话中 Re-rank
+              enterPhase(2);
+              if (payload.query) $("query").value = payload.query;
+              render();
+              $("history-mask").style.display = "none";
+              writeDemoCache(payload.query || "", payload);
+            } catch (error) { alert(error.message); }
+          };
+        });
+        list.querySelectorAll(".hi-del").forEach(button => {
+          button.onclick = async () => {
+            const preview = (button.dataset.q || button.dataset.path || "").slice(0, 80);
+            if (!confirm(uiT("history_confirm_del", preview))) return;
+            try {
+              await json("/api/session?id=" + encodeURIComponent(button.dataset.path), { method: "DELETE" });
+              // 若删除的是当前工作区会话，清掉页面缓存状态
+              if (state && state.session && state.session.path === button.dataset.path) {
+                state = null;
+                showPool = showFacts = showWeights = false;
+                render();
+              }
+              try {
+                Object.keys(sessionStorage).forEach(key => {
+                  if (!key.startsWith("lexdr-demo-") && !key.startsWith("lexdr-rr-")) return;
+                  sessionStorage.removeItem(key);
+                });
+              } catch (error) {}
+              await renderHistory();
+            } catch (error) { alert(error.message); }
+          };
+        });
+      }
+      $("open-history").onclick = () => {
+        $("history-mask").style.display = "flex";
+        renderHistory().catch(error => alert(error.message));
+      };
+      $("history-close").onclick = () => { $("history-mask").style.display = "none"; };
+      $("history-mask").onclick = event => { if (event.target === $("history-mask")) $("history-mask").style.display = "none"; };
+      const readFileText = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsText(file);
+      });
+      const readFileBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          const comma = result.indexOf(",");
+          resolve(comma >= 0 ? result.slice(comma + 1) : result);
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsDataURL(file);
+      });
+      if ($("mcp-file")) $("mcp-file").onchange = async () => {
+        const file = $("mcp-file").files && $("mcp-file").files[0];
+        if (!file) return;
+        try { $("mcp-json").value = await readFileText(file); }
+        catch (error) { alert(error.message); }
+      };
+      $("mcp-add").onclick = async () => {
+        try {
+          const text = $("mcp-json").value.trim();
+          const file = $("mcp-file").files && $("mcp-file").files[0];
+          const result = await json("/api/config/mcp", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({json: text, filename: file ? file.name : ""})});
+          $("mcp-json").value = "";
+          if ($("mcp-file")) $("mcp-file").value = "";
+          await renderConfig();
+          alert(uiT("mcp_submitted", (result.servers || []).join(", ")));
+        } catch (error) { alert(error.message); }
+      };
+      $("skill-add").onclick = async () => {
+        try {
+          const file = $("skill-zip").files && $("skill-zip").files[0];
+          if (!file) { alert(uiT("pick_skill_zip")); return; }
+          const zip_base64 = await readFileBase64(file);
+          const result = await json("/api/config/skill", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({zip_base64, filename: file.name})});
+          $("skill-zip").value = "";
+          await renderConfig();
+          alert(uiT("skill_submitted", (result.skills || []).join(", ")));
+        } catch (error) { alert(error.message); }
+      };
+      $("sys-save").onclick = async () => {
+        try {
+          const body = {
+            dmx_api_key: $("sys-api-key").value.trim(),
+            dmx_base_url: $("sys-base-url").value.trim(),
+            llm_model: $("sys-llm-model").value.trim(),
+            jev_model: $("sys-jev-model").value.trim(),
+            pool_size: Number($("sys-pool-size").value),
+            max_rounds: Number($("sys-max-rounds").value),
+            top_k: Number($("sys-top-k").value)
+          };
+          await json("/api/config/system", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+          $("sys-api-key").value = "";
+          invalidateRerankCaches();
+          try { Object.keys(sessionStorage).forEach(key => { if (key.startsWith("lexdr-demo-")) sessionStorage.removeItem(key); }); } catch (error) {}
+          await renderConfig();
+          alert(uiT("sys_saved"));
+        } catch (error) { alert(error.message); }
+      };
+      // —— 启动清扫：演示缓存仅在当前页面运行期间有效；刷新后全部丢弃，避免旧过滤状态与排名残留 ——
+      (function sweepFilterCaches() {
+        try {
+          Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith("lexdr-demo-") || key.startsWith("lexdr-rr-")) sessionStorage.removeItem(key);
+          });
+        } catch (error) {}
+      })();
+      // 预加载系统设置，填充 Top-K 指标
+      json("/api/config").then(data => {
+        const sys = (data && data.system) || {};
+        if ($("sys-pool-size") && !$("sys-pool-size").value) $("sys-pool-size").value = sys.pool_size ?? 50;
+        if ($("sys-max-rounds") && !$("sys-max-rounds").value) $("sys-max-rounds").value = sys.max_rounds ?? 3;
+        if ($("sys-top-k")) $("sys-top-k").value = sys.top_k ?? 10;
+        text("topk-count", currentTopK());
+      }).catch(() => {});
+      resetPlan();
+      document.addEventListener("uslecar-filter-state", event => {
+        if (!event.detail) return;
+        state = event.detail;
+        phase = 3;
+        render();
+      });
+      document.addEventListener("uslecar-lang", () => { resetPlan(); if (state) { render(); if ((state.stage1_meta || {}).plans) renderPlan(); } });
+    })();
+  </script>
+</body>
+</html>
