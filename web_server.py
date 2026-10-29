@@ -650,15 +650,17 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
-        # Serve assets under /figures/ (project figures/ directory)
-        if parsed.path.startswith("/figures/"):
-            figures_root = (config.ROOT_DIR / "figures").resolve()
-            rel = parsed.path[len("/figures/") :]
-            target = (figures_root / rel).resolve()
+        # Serve images under /figures/ and /assets/
+        for prefix, dirname in (("/figures/", "figures"), ("/assets/", "assets")):
+            if not parsed.path.startswith(prefix):
+                continue
+            root = (config.ROOT_DIR / dirname).resolve()
+            rel = parsed.path[len(prefix) :]
+            target = (root / rel).resolve()
             if (
                 rel
                 and target.is_file()
-                and (target == figures_root or figures_root in target.parents)
+                and (target == root or root in target.parents)
             ):
                 ctype = {
                     ".png": "image/png",
