@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/banner.svg" alt="LexCaR — User-Centered Legal Case Retrieval with Editable Ranking Criteria" width="100%">
+<img src="./assets/banner.png" alt="LexCaR — User-Centered Legal Case Retrieval with Editable Ranking Criteria" width="100%">
 
 </div>
 
@@ -145,7 +145,7 @@ LexCaR/
 ├── experiment/              # Efficiency / controllability scripts & results
 ├── web/                     # Frontend
 ├── figures/                 # Paper figures & UI assets
-├── assets/                  # README banner & dividers
+├── assets/                  # README banner (PNG) & dividers
 ├── .env.example             # Configuration template
 ├── requirements.txt
 └── LICENSE
