@@ -1,65 +1,133 @@
-# LexCaR
-User-Centered Legal Case Retrieval with Editable Ranking Criteria
+<div align="center">
 
-[![Conference](https://img.shields.io/badge/ECIR-2027%20Demo-blue.svg)](https://github.com/kunranLi/LexCaR)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
-[![Code](https://img.shields.io/badge/Code-GitHub-black.svg)](https://github.com/kunranLi/LexCaR)
+<img src="./assets/banner.svg" alt="LexCaR — User-Centered Legal Case Retrieval with Editable Ranking Criteria" width="100%">
+
+</div>
+
+<br>
+
+<div align="center">
+
+[![Conference](https://img.shields.io/badge/ECIR-2027%20Demo-3a5a8c.svg?style=flat-square)](https://github.com/kunranLi/LexCaR)
+[![Python](https://img.shields.io/badge/Python-3.10+-5b606b.svg?style=flat-square)](https://www.python.org/)
+[![Stages](https://img.shields.io/badge/Pipeline-3%20stages-b5462f.svg?style=flat-square)](#-method--three-stages)
+[![License](https://img.shields.io/badge/License-MIT-9aa0ab.svg?style=flat-square)](./LICENSE)
+
+**LexCaR** is a user-centered legal case retrieval system with editable ranking criteria:
+build a reusable candidate pool once, then refine ranking under evolving user focus—without restarting the retrieval loop.
+
+*Issue-aware guidance · Direct control · Efficiency*
+
+### 🚪 Start here
+
+| Who | Where |
+|:--|:--|
+| **Try the demo** | [`web_server.py`](./web_server.py) / [`pipeline.py`](./pipeline.py) · local Web UI & CLI |
+| **Read the method** | [Method · Three stages](#-method--three-stages) · candidate pool → issue discovery → user-steered reranking |
+| **Reproduce experiments** | [`experiment/`](./experiment/) · controllability / cost / latency vs. full agentic re-retrieval |
+
+[Introduction](#-introduction) ·
+[Design](#-design-properties) ·
+[Method](#-method--three-stages) ·
+[Findings](#-main-findings) ·
+[Usage](#-usage) ·
+[Citation](#-citation)
+
+</div>
+
+<img src="./assets/rule.svg" alt="" width="100%">
+
+> [!WARNING]
+> ### ⚖️ Disclaimer
+>
+> LexCaR is a **research / demo** system for interactive legal case retrieval. It does **not** provide legal advice, a formal legal opinion, or a substitute for a licensed attorney.
+>
+> - Rankings, issue checklists, and Jev assessments are **decision-support signals**, not determinations of law or fact.
+> - Case text comes from third-party databases (e.g. PKULaw); you must comply with their terms and obtain your own credentials.
+> - Final legal judgment remains with qualified legal professionals, who bear responsibility for any use of the outputs.
+
+<img src="./assets/rule.svg" alt="" width="100%">
 
 ## 📖 Introduction
 
 Legal case retrieval helps legal professionals find previous cases that inform their analysis of a new case. However, a user’s purpose may change as they examine retrieved judgments, so the target cases they consider relevant can change within the same session. Existing methods either keep ranking criteria fixed, unable to follow the user’s evolving focus, or re-run the whole loop at every focus shift, which drives up latency and cost.
 
-To address this, we present **LexCaR**, a user-centered legal case retrieval system with three properties. **Issue-aware guidance.** LexCaR surfaces the atomic legal issues attended to in prior judgments and assesses whether each holds under the query facts to suggest directions for fine-grained retrieval. **Direct control.** Users can add or remove criteria, adjust weights, and define exclusion rules to steer the ranking toward their preferred angle. **Efficiency.** LexCaR builds a reusable candidate pool once and re-ranks it, so each refinement avoids replanning and external retrieval, staying cheaper and faster than restarting the loop.
+To address this, we present **LexCaR**, a user-centered legal case retrieval system with editable ranking criteria.
 
-## ✨ Key Features
+<img src="./assets/rule.svg" alt="" width="100%">
 
-* **Three-stage pipeline**: Candidate pool construction → issue discovery & query assessment → user-steered reranking, with editable criteria throughout the session.
+## 🧩 Design Properties
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+#### 🧭 Issue-aware guidance
+
+Surfaces atomic legal issues attended to in prior judgments and assesses whether each holds under the query facts—suggesting directions for fine-grained retrieval.
+
+</td>
+<td width="33%" valign="top">
+
+#### 🎛️ Direct control
+
+Add or remove criteria, adjust weights, and define exclusion rules to steer ranking toward the preferred legal angle—without burying decisions inside an opaque agent loop.
+
+</td>
+<td width="33%" valign="top">
+
+#### ⚡ Efficiency
+
+Builds a reusable candidate pool once and re-ranks it on each focus shift, avoiding replanning and external retrieval—cheaper and faster than restarting the loop.
+
+</td>
+</tr>
+</table>
+
+<img src="./assets/rule.svg" alt="" width="100%">
+
+## 🔧 Method · Three Stages
+
 <p align="center">
-  <img src="figures/framework.png" alt="LexCaR framework" width="800">
+  <img src="./figures/framework.png" alt="Method of LexCaR" width="100%">
   <br>
-  <em>Figure 1: Method of LexCaR.</em>
+  <em>Figure 1: Method of LexCaR</em>
 </p>
 
-* **Issue-aware guidance**: From top-ranked judgments, LexCaR extracts atomic legal issues and uses Jev to assess whether each issue holds / is decidable under the query facts, suggesting directions for fine-grained retrieval.
+### Stage 1 · Candidate Pool Construction
 
-* **Direct control**: Users can add or remove ranking criteria (natural-language intents compiled into Jev questions), adjust weights, and define exclusion rules to steer results toward the angle they care about.
+Given a query case, LexCaR constructs a candidate pool from external legal case databases via MCP with an agentic retriever. Retrieval is driven by a built-in (replaceable) retrieval skill; the retriever may run several search rounds until the target pool size is reached. Users can swap the skill and set rounds / pool size for customized pools.
 
-* **Efficient in-pool refinement**: A reusable candidate pool is built once via agentic MCP retrieval; each focus shift re-ranks the same pool without replanning or external search—cheaper and faster than restarting the loop.
+### Stage 2 · Issue Discovery and Query Assessment
 
-* **Interactive demos**: Local Web UI (`web_server.py`) and CLI (`pipeline.py` / `demo_interactive.py`) for end-to-end sessions.
+1. **Preset-criteria reranking** — Jev scores each candidate on legal-relationship similarity, key-fact similarity, and precedential value.
+2. **Legal issue extraction** — An LLM analyzes judicial reasoning of top-ranked cases and produces a checklist of atomic legal issues.
+3. **Query-case assessment** — For each issue, Jev judges whether it is established by the query facts and whether the query text is sufficient (yes / no / unknown).
 
-## 🔧 Method Overview
+### Stage 3 · User-Steered Reranking
 
-### Stage 1: Candidate Pool Construction
+Users edit the ranking specification (add/remove criteria, adjust weights, define exclusion rules). The candidate pool is reused; Jev re-evaluates active criteria at each rerank, and LexCaR shows the updated ranking with per-criterion contributions.
 
-Given a query case, LexCaR constructs a candidate pool from external legal case databases via MCP with an agentic retriever. Retrieval is driven by a built-in (replaceable) retrieval skill; the retriever may execute several rounds of search until the target pool size is reached. Users can replace the skill and set search rounds / pool size for customized pools.
-
-### Stage 2: Issue Discovery and Query Assessment
-
-1. **Preset-criteria reranking** — Jev evaluates each candidate with three preset criteria (legal-relationship similarity, key-fact similarity, precedential value) and ranks by a weighted score.
-2. **Legal issue extraction** — An LLM analyzes judicial reasoning of top-ranked cases and produces a structured checklist of atomic legal issues.
-3. **Query-case assessment** — For each issue, Jev judges whether it is established by the query facts and whether the query text provides sufficient information (yes / no / unknown).
-
-### Stage 3: User-Steered Reranking
-
-Users edit the ranking specification by adding/removing criteria, adjusting weights, and defining exclusion rules. The candidate pool is reused; Jev re-evaluates active criteria at each rerank and LexCaR presents the updated ranking with per-criterion contributions.
+<img src="./assets/rule.svg" alt="" width="100%">
 
 ## 📊 Main Findings
 
 <p align="center">
-  <img src="figures/Discussion.png" alt="LexCaR performance" width="800">
+  <img src="./figures/Discussion.png" alt="The performance of LexCaR" width="100%">
   <br>
-  <em>Figure 2: The performance of LexCaR.</em>
+  <em>Figure 2: The performance of LexCaR</em>
 </p>
 
-We compared LexCaR and a traditional agentic retriever on the same underlying LLM (GPT-4o-mini), with legal experts running 3 rounds of interactive retrieval over 50 queries. Round 1 shared a candidate pool from PKULaw MCP. In Rounds 2–3, experts proposed focus shifts; LexCaR re-ranked the shared pool, while the agentic baseline re-ran full retrieval. Using experts’ target sets on the Round-1 pool as gold:
+We compared LexCaR and a traditional agentic retriever on the same LLM (GPT-4o-mini), with legal experts running 3 interactive rounds over 50 queries. Round 1 shared a PKULaw MCP candidate pool. In Rounds 2–3, experts proposed focus shifts: LexCaR re-ranked the shared pool; the baseline re-ran full retrieval. Gold labels were experts’ target sets on the Round-1 pool.
 
-* LexCaR aligned top results with the updated gold standard (P@K ≈ 0.60 / 0.51 in R2 / R3).
-* The re-run agent, suffering candidate-pool drift, fell to ≈ 0.06–0.08.
-* By Round 3, cumulative cost/latency were ¥0.90 / 112.2 s for LexCaR vs. ¥2.52 / 123.4 s for the baseline.
+| | Round 2 | Round 3 | Cumulative (by R3) |
+|:--|:--:|:--:|:--:|
+| **LexCaR** P@K | ≈ 0.60 | ≈ 0.51 | ¥0.90 · 112.2 s |
+| **Agentic re-run** P@K | ≈ 0.06–0.08 | ≈ 0.06–0.08 | ¥2.52 · 123.4 s |
 
-Aggregate tables and plotting scripts: [`experiment/results/`](./experiment/results/) and [`experiment/README.md`](./experiment/README.md).
+Aggregate tables & plotting scripts: [`experiment/results/`](./experiment/results/) · [`experiment/README.md`](./experiment/README.md)
+
+<img src="./assets/rule.svg" alt="" width="100%">
 
 ## 📂 Repository Structure
 
@@ -77,12 +145,15 @@ LexCaR/
 ├── experiment/              # Efficiency / controllability scripts & results
 ├── web/                     # Frontend
 ├── figures/                 # Paper figures & UI assets
+├── assets/                  # README banner & dividers
 ├── .env.example             # Configuration template
 ├── requirements.txt
 └── LICENSE
 ```
 
-## 🚀 Getting Started
+<img src="./assets/rule.svg" alt="" width="100%">
+
+## 🚀 Usage
 
 ### Requirements
 
@@ -109,13 +180,8 @@ cp .env.example .env   # then fill in DMX_API_KEY and optional MCP tokens
 ### Run CLI
 
 ```bash
-# Built-in demo query (full pipeline)
 python pipeline.py --stage all --demo
-
-# Custom case description
 python pipeline.py --stage all --query "Your case description..."
-
-# Interactive Stage 3 refinement
 python demo_interactive.py
 ```
 
@@ -126,24 +192,20 @@ python web_server.py
 # open http://127.0.0.1:8765 (default; see --help)
 ```
 
-### Optional: LeCaRDv2 sample queries
+### Optional data & experiments
 
-Local `query.json` / `candidates.jsonl` are **not** shipped (size / license). Place them under `data/lecardv2/` for `--qid` support. See [`data/lecardv2/README.md`](./data/lecardv2/README.md). Official dataset: [THUIR/LeCaRDv2](https://github.com/THUIR/LeCaRDv2).
-
-### Reproduce experiments
+Local LeCaRDv2 files are **not** shipped. Place them under `data/lecardv2/` for `--qid` support — see [`data/lecardv2/README.md`](./data/lecardv2/README.md) · [THUIR/LeCaRDv2](https://github.com/THUIR/LeCaRDv2).
 
 ```bash
 python -m experiment.run_efficiency_controllability --qid "00000,00002" --pool-size 15 --n-shifts 2
 python -m experiment.plot_round_curves --exp-dir experiment/results/exp_eff_ctrl_n50_combined
 ```
 
-### Configuration
+Configuration lives in `.env` (from `.env.example`). MCP endpoints under `mcp/` use `${PKULAW_MCP_TOKEN}` / `${WK_MCP_TOKEN}` — never commit real tokens.
 
-All knobs live in `.env` (copy from `.env.example`): models, pool size, timeouts, Stage 2/3 thresholds, and prompts. MCP endpoints under `mcp/` use `${PKULAW_MCP_TOKEN}` / `${WK_MCP_TOKEN}` placeholders—never commit real tokens.
+<img src="./assets/rule.svg" alt="" width="100%">
 
 ## 📜 Citation
-
-If you use LexCaR in your research, please cite:
 
 ```bibtex
 @inproceedings{lexcar2027,
@@ -154,8 +216,8 @@ If you use LexCaR in your research, please cite:
 }
 ```
 
-## 📄 License
+## 📄 License · Terms
 
 This project is released under the [MIT License](./LICENSE).
 
-Third-party case databases (PKULaw, Wolters Kluwer, LeCaRDv2) remain under their respective terms; you must obtain your own access credentials and comply with their licenses.
+Third-party case databases (PKULaw, Wolters Kluwer, LeCaRDv2) remain under their respective terms; obtain your own access credentials and comply with their licenses.
