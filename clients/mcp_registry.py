@@ -1,4 +1,4 @@
-"""加载标准 mcpServers 配置。工具不写死，连接后用 tools/list 发现。"""
+"""Load standard mcpServers config. Tools are discovered via tools/list after connect."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ class McpServerSpec:
 
 
 def load_mcp_servers(directory: Optional[Path] = None) -> List[McpServerSpec]:
-    """合并 mcp/*.json 里的 mcpServers。文件名以 _ 开头的不加载。"""
+    """Merge mcpServers from mcp/*.json. Files whose names start with _ are skipped."""
     folder = directory or (config.ROOT_DIR / "mcp")
     if not folder.is_dir():
         return []
@@ -99,7 +99,7 @@ def _headers(raw: Any) -> Dict[str, str]:
 
 
 def _missing_secret(raw: Dict[str, Any], authorization: str) -> bool:
-    """配置里写了 ${TOKEN} 但环境变量为空时，不连接这个服务。"""
+    """Skip connecting when a ${TOKEN} is referenced but the env var is empty."""
     blob = json.dumps(raw.get("headers") or {}, ensure_ascii=False)
     names = _ENV_RE.findall(blob)
     if not names:

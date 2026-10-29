@@ -39,7 +39,7 @@
     <aside class="panel drawer"><div class="panel-head"><h2>Editable Ranking Criteria</h2></div><div class="drawer-body"><div class="detail-block"><h3>Current Weight Formula</h3><div class="formula" id="formula">score = Σ ŵᵢ · Pᵢ</div><div id="weights"></div></div><div class="detail-block"><h3>Add / Remove Criteria</h3><input id="dimension-input" style="width:100%;padding:7px" placeholder="e.g. emphasize self-surrender"><div class="cm-hint" id="dimension-hint" style="margin-top:4px">Add a ranking criterion in natural language. Remove one with × on its weight row.</div></div><div class="detail-block"><h3>Exclusion rules</h3><div id="filter-rules" style="display:none"></div><input id="filter-input" style="width:100%;padding:7px" placeholder="e.g. exclude administrative cases"><div class="criteria-actions"><button class="primary" id="apply-criteria">Apply Criteria</button><button class="primary" id="apply-rerank">Re-rank</button></div></div></div></aside>
   </main>
   <script>
-    // —— i18n：EN / 中文 界面语言切换（检索内容、案情与 LLM 生成内容始终保留原文） ——
+    // —— i18n: EN / Chinese UI language toggle (retrieval text, case facts, and LLM output stay in original language) ——
     const UI_I18N = {
       en: {
         th_verdict: "Status",
@@ -287,7 +287,7 @@
     };
     let UI_LANG = localStorage.getItem("uslecar-lang") === "zh" ? "zh" : "en";
     function uiT(key, ...args) { const v = UI_I18N[UI_LANG][key]; return typeof v === "function" ? v(...args) : v; }
-    // Agent retrieval 动画文案固定英文（不受界面语言切换影响）
+    // Agent retrieval animation copy stays English (not affected by UI language)
     function planT(key, ...args) { const v = UI_I18N.en[key]; return typeof v === "function" ? v(...args) : v; }
     function uiApplyStatic() {
       document.title = uiT("doc_title");
@@ -324,7 +324,7 @@
       set("#session-label", "session_label");
       set("#query", "ph_query", "placeholder");
       set("#search", "btn_analyze");
-      // Agent retrieval 标题固定英文
+      // Agent retrieval title stays English
       const planTitleEl = document.getElementById("plan-title");
       if (planTitleEl) planTitleEl.textContent = planT("plan_title_default");
       const ms = document.querySelectorAll(".metrics .metric span");
@@ -362,7 +362,7 @@
     const $=s=>document.querySelector(s);let state=null;
     const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
     async function json(url,opt){const r=await fetch(url,opt);const d=await r.json();if(!r.ok)throw Error(d.error||"Request failed");return d}
-    // 两套 UI 脚本共用的过滤缓存维护：规则变化后不得继续回放旧排名。
+    // Shared filter-cache maintenance for both UI scripts: after rules change, do not replay stale rankings.
     function resetRankingPayload(payload){if(!payload)return payload;const pool=payload.candidate_pool||[];if(pool.length)payload.current_ranking=pool.map((item,i)=>({...item,weighted_score:null,stage2_rank:null,rank:i+1}));return payload}
     function invalidateRerankCaches(){try{Object.keys(sessionStorage).forEach(key=>{if(key.startsWith("lexdr-rr-"))sessionStorage.removeItem(key)})}catch(error){}}
     function syncDemoCacheState(payload){
@@ -401,7 +401,7 @@
     async function loadList(){if(!$("#session-select"))return;const d=await json("/api/sessions");$("#session-select").innerHTML='<option value="">' + uiT("select_session") + '</option>'+d.items.map(x=>`<option value="${esc(x.path)}">${esc(x.session_id)} · ${esc((x.query||"").slice(0,28))}</option>`).join("")}
     async function loadSession(id){if(!id)return;state=await json("/api/session?id="+encodeURIComponent(id));render()}
     if($("#session-select"))$("#session-select").onchange=e=>loadSession(e.target.value);if($("#refresh"))$("#refresh").onclick=loadList;
-    // 检索与重排仅由下方演示流程绑定，避免双事件重复请求和状态竞争。
+    // Search/rerank are bound only by the demo flow below to avoid duplicate handlers and state races.
     document.addEventListener("uslecar-filter-state",event=>{if(event.detail){state=event.detail;render()}});
     loadList().catch(e=>console.error(e));
   </script>
@@ -416,7 +416,7 @@
       let showPool = false, showFacts = false, showWeights = false;
       let factsAnalyzing = false;
       let rankingAnimating = false;
-      // 仅在用户真正点击 Re-rank 并完成重排后，标题才切到 Re-ranked Results
+      // Switch the table title to Re-ranked Results only after the user clicks Re-rank and it finishes
       let userReranked = false;
       const FACTS_BOT_SVG = `<div class="bot-fig" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="18" width="36" height="30" rx="8" fill="#f3e7f6" stroke="#660874" stroke-width="2.5"/><rect x="22" y="8" width="20" height="10" rx="4" fill="#660874"/><circle cx="32" cy="8" r="3" fill="#e6c86e"/><circle class="bot-eye" cx="26" cy="32" r="3.5" fill="#4a1056"/><circle class="bot-eye" cx="38" cy="32" r="3.5" fill="#4a1056" style="animation-delay:.15s"/><path d="M26 42h12" stroke="#660874" stroke-width="2.5" stroke-linecap="round"/><rect x="8" y="26" width="6" height="12" rx="3" fill="#660874"/><rect x="50" y="26" width="6" height="12" rx="3" fill="#660874"/><rect x="20" y="48" width="8" height="6" rx="2" fill="#4a1056"/><rect x="36" y="48" width="8" height="6" rx="2" fill="#4a1056"/></svg><div class="bot-scan"></div></div>`;
       function factsAnalyzingHtml() {
@@ -426,7 +426,7 @@
         return `<div class="rank-swap"><div class="rank-swap-msg">${escapeHtml(uiT("rank_swapping"))}</div><div class="rank-swap-sub">${escapeHtml(uiT("rank_swapping_sub"))}</div><div class="rank-swap-stage" aria-hidden="true"><div class="rank-card c1"><span class="rc-no">1</span><div class="rc-bar"></div></div><div class="rank-card c2"><span class="rc-no">2</span><div class="rc-bar"></div><div class="rank-card c3"><span class="rc-no">3</span><div class="rc-bar"></div></div></div>`;
       }
 
-      // 不再展示阶段说明文案；进入阶段时只切换左侧 Pipeline 高亮
+      // No stage blurb text; entering a stage only updates the left Pipeline highlight
       function setStepDetail() {
         const el = $("step-detail");
         if (el) { el.textContent = ""; el.style.display = "none"; }
@@ -436,14 +436,14 @@
         setStep(n);
         setStepDetail();
       }
-      // 清规则后后端不重算排名：丢弃残留的 current_ranking，回退为全池无加权展示（0 Jev 消耗）
+      // After clearing rules the backend does not rescore: drop residual current_ranking and fall back to unweighted full pool (0 Jev cost)
       function resetRankingToPool() {
         if (!state) return;
         const pool = state.candidate_pool || [];
         if (!pool.length) return;
         state.current_ranking = pool.map((item, i) => ({ ...item, weighted_score: null, stage2_rank: null, rank: i + 1 }));
       }
-      // 规则已空但排名条数少于池大小 → 历史残留排名，同样回退到全池
+      // Rules empty but ranking shorter than pool → stale history ranking; also fall back to full pool
       function fixStaleRanking() {
         if (!state) return;
         const rules = state.filter_rules || [];
@@ -459,10 +459,10 @@
       }
       function rows() {
         if (!state) return [];
-        // Query-Case Assessment 未完成前不展示 Initial Ranking，仍显示候选池
+        // Before Query-Case Assessment finishes, do not show Initial Ranking; keep showing the candidate pool
         if (factsAnalyzing) return showPool ? state.candidate_pool || [] : [];
         if (phase >= 3) {
-          // Re-ranked Results 只展示 Top-K；After Exclusion 指标仍用全量存活池
+          // Re-ranked Results shows Top-K only; After Exclusion metric still uses the full surviving pool
           const all = state.current_ranking || [];
           const k = Number(currentTopK());
           return Number.isFinite(k) && k > 0 ? all.slice(0, k) : all;
@@ -578,7 +578,7 @@
         tbody.querySelectorAll("tr.expanded").forEach(tr => tr.classList.remove("expanded"));
         if (expandedId) insertDetailRow(tbody, expandedId);
       }
-      // —— 演示缓存：同一案情重复演示时跳过检索与重排，避免重复消耗 MCP / Jev 调用 ——
+      // —— Demo cache: skip retrieval/rerank when replaying the same case to avoid repeat MCP / Jev spend ——
       function hashSig(str) { let h = 5381; for (let i = 0; i < str.length; i += 1) { h = ((h << 5) + h + str.charCodeAt(i)) | 0; } return (h >>> 0).toString(36); }
       function demoCacheKey(query) { return "lexdr-demo-" + hashSig(query); }
       function readDemoCache(query) {
@@ -624,7 +624,7 @@
         };
       }
       function afterExclusionCount() {
-        // After Exclusion = 排除规则作用后的剩余池大小，不是展示用的 top-k
+        // After Exclusion = pool size left after exclude rules, not the display top-k
         if (!state || phase < 2) return "—";
         const poolN = (state.candidate_pool || []).length || (state.session || {}).candidate_count || 0;
         const rules = state.filter_rules || [];
@@ -868,10 +868,10 @@
         enterPhase(1);
         try {
           const cached = event.shiftKey ? null : readDemoCache(query);
-          // 仅当缓存已含 Stage2 要件时才走纯回放；缺事实确认则继续走正式流水线
+          // Pure replay only when the cache already has Stage2 facts; otherwise continue the real pipeline
           if (cached && (cached.confirmed_facts || []).length) {
             state = cached;
-            // 演示启动即清空遗留的过滤条件（过期缓存可能带旧规则）
+            // Clear leftover filters at demo start (stale cache may carry old rules)
             if ((state.filter_rules || []).length) {
               try {
                 state = await json("/api/filters/clear", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: state.session.path})});
@@ -889,13 +889,13 @@
             await playPlan();
             showPool = true; render();
             await pause(1800);
-            // Stage2 回放：评估完成后再展示 Initial Ranking，不自动进入 Stage3
+            // Stage2 replay: show Initial Ranking only after assessment; do not auto-enter Stage3
             showFacts = showWeights = true;
             enterPhase(2); render();
             writeDemoCache(query, state);
             return;
           }
-          // 复用优先：同 query 的服务端已有会话（含事实确认/要件/排名）直接回放；界面不暴露复用/缓存，模拟真实流程；Shift+点击强制重新检索
+          // Prefer reuse: replay an existing server session for the same query (facts/criteria/ranking); UI hides reuse/cache to mimic a live run; Shift+click forces re-search
           let session = null, reused = false;
           try {
             const list = await json("/api/sessions");
@@ -911,7 +911,7 @@
             session = await searchLive(query);
             streamedLive = true;
           }
-          // 每次载入会话都自动清空全部过滤条件，不沿用历史规则
+          // Always clear all filters when loading a session; do not keep historical rules
           if ((session.filter_rules || []).length) {
             try {
               session = await json("/api/filters/clear", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({session_id: session.session.path})});
@@ -934,10 +934,10 @@
             await playPlan();
           }
           showPool = true; render();
-          // 必须以 confirmed_facts 判断 Stage2 是否已完成；Stage1 的 retrieval score
-          // 不能当作加权重排结果，否则会跳过要件发现与 Query-Case Assessment。
+          // Stage2 completion must be judged by confirmed_facts; Stage1 retrieval score
+          // must not be treated as a weighted rerank result, or element discovery and Query-Case Assessment are skipped.
           const hasStage2 = (state.confirmed_facts || []).length > 0;
-          // Pipeline 进入 Stage2，但 Initial Ranking 等 Query-Case Assessment 结束后再展示
+          // Pipeline enters Stage2, but Initial Ranking waits until Query-Case Assessment finishes
           enterPhase(2);
           showFacts = true;
           showWeights = false;
@@ -958,7 +958,7 @@
             factsAnalyzing = false;
             await pause(600);
           }
-          // Assessment 完成后才展示 Initial Ranking 与可编辑标准；不自动进入 Stage3
+          // Show Initial Ranking and editable criteria only after assessment; do not auto-enter Stage3
           showWeights = true;
           enterPhase(2);
           render();
@@ -998,7 +998,7 @@
           invalidateRerankCaches();
           syncDemoCacheState(state);
           writeDemoCache(state.query || $("query").value.trim(), state);
-          // 用户开始编辑标准即进入 Stage3 Pipeline；未 Re-rank 前标题仍为 Initial Ranking
+          // Editing criteria enters Stage3 in the Pipeline; title stays Initial Ranking until Re-rank
           enterPhase(3);
           render();
         } catch (error) { alert(error.message); }
@@ -1032,7 +1032,7 @@
         }
         finally { setBtnLoading("apply-rerank", false, "btn_reranking", "btn_rerank"); }
       };
-      // —— MCP 与技能配置 ——
+      // —— MCP and skill configuration ——
       async function renderConfig() {
         const data = await json("/api/config");
         const sys = data.system || {};
@@ -1088,7 +1088,7 @@
               factsAnalyzing = false;
               rankingAnimating = false;
               userReranked = false;
-              // 载入历史仍显示 Initial Ranking，直到用户在本会话中 Re-rank
+              // Loading history still shows Initial Ranking until the user Re-ranks in this session
               enterPhase(2);
               if (payload.query) $("query").value = payload.query;
               render();
@@ -1103,7 +1103,7 @@
             if (!confirm(uiT("history_confirm_del", preview))) return;
             try {
               await json("/api/session?id=" + encodeURIComponent(button.dataset.path), { method: "DELETE" });
-              // 若删除的是当前工作区会话，清掉页面缓存状态
+              // If the deleted session is the current workspace, clear page cache state
               if (state && state.session && state.session.path === button.dataset.path) {
                 state = null;
                 showPool = showFacts = showWeights = false;
@@ -1189,7 +1189,7 @@
           alert(uiT("sys_saved"));
         } catch (error) { alert(error.message); }
       };
-      // —— 启动清扫：演示缓存仅在当前页面运行期间有效；刷新后全部丢弃，避免旧过滤状态与排名残留 ——
+      // —— Startup sweep: demo cache is page-lifetime only; discard on refresh to avoid stale filters/rankings ——
       (function sweepFilterCaches() {
         try {
           Object.keys(sessionStorage).forEach(key => {
@@ -1197,7 +1197,7 @@
           });
         } catch (error) {}
       })();
-      // 预加载系统设置，填充 Top-K 指标
+      // Preload system settings and fill the Top-K metric
       json("/api/config").then(data => {
         const sys = (data && data.system) || {};
         if ($("sys-pool-size") && !$("sys-pool-size").value) $("sys-pool-size").value = sys.pool_size ?? 50;

@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-# Windows 默认 GBK 控制台遇 ✓ 等字符会 UnicodeEncodeError；容错重配 stdout/stderr
+# Windows GBK consoles raise UnicodeEncodeError on chars like ✓; reconfigure stdout/stderr safely
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8", errors="replace")
@@ -41,9 +41,10 @@ _ENV_KEY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
 
 
 class SafeStream:
-    """Windows 下进程没有有效控制台句柄时（如从 IDE/计划任务启动），
-    rich / tqdm / print 写 stdout 会抛 ``OSError [Errno 22] Invalid argument``，
-    打断正在处理的 Web 请求。此包装器吞掉写失败，让控制台输出不再影响服务。
+    """When the process has no valid console handle on Windows (e.g. IDE / scheduled task),
+    rich / tqdm / print writing to stdout can raise ``OSError [Errno 22] Invalid argument``
+    and abort an in-flight web request. This wrapper swallows write failures so console
+    output cannot break the service.
     """
 
     def __init__(self, stream) -> None:
@@ -97,8 +98,8 @@ def _summary(session: SessionState, path: Path) -> dict:
 
 
 def _session_payload(session: SessionState, path: Path) -> dict:
-    # Stage2 写入的 current_ranking 是精简结构（doc_id/score/rank/dim_scores），
-    # 前端表格需要案件元数据；这里用候选池补全展示字段，并归一加权得分键名。
+    # Stage2 writes a slim current_ranking (doc_id/score/rank/dim_scores);
+    # the UI table needs case metadata — enrich from the candidate pool and normalize weighted-score keys.
     pool_map = {str(item.get("doc_id")): item for item in session.candidate_pool or []}
     ranking = []
     for item in session.current_ranking or []:
@@ -108,8 +109,8 @@ def _session_payload(session: SessionState, path: Path) -> dict:
             for key in ("title", "court", "charges", "fact", "reason", "result", "retrieval_score"):
                 if entry.get(key) is None and base.get(key) is not None:
                     entry[key] = base.get(key)
-        # Stage1 候选排序也用 score 字段；只有 Stage2/3（有 dim_scores 或已确认要件）
-        # 才把 score 视作加权分，避免前端误判「已重排」而跳过 Stage2。
+        # Stage1 also uses a score field; only treat score as weighted after Stage2/3
+        # (dim_scores or confirmed elements), so the UI does not skip Stage2 as already reranked.
         if entry.get("weighted_score") is None and entry.get("score") is not None:
             if entry.get("dim_scores") is not None or session.confirmed_facts:
                 entry["weighted_score"] = entry["score"]
@@ -130,7 +131,7 @@ def _session_payload(session: SessionState, path: Path) -> dict:
     return payload
 
 
-# ---- MCP / Skill 配置管理（供前端自定义检索能力） ----
+# ---- MCP / Skill config management (frontend-customizable retrieval) ----
 
 def _safe_name(name: object) -> str:
     name = str(name or "").strip()
@@ -333,7 +334,7 @@ def _delete_mcp(name: str) -> bool:
             path.write_text(json.dumps({"mcpServers": servers}, ensure_ascii=False, indent=2),
                             encoding="utf-8")
         else:
-            # 文件空了：加 _ 前缀停用（加载器自动忽略，可随时改回恢复）
+            # Empty file: disable by adding a _ prefix (loader ignores; rename back to restore)
             try:
                 path.rename(path.with_name(f"_disabled_{path.name}"))
             except OSError:
@@ -456,7 +457,7 @@ def _apply_system_settings(payload: dict) -> dict:
             raise ValueError("Top-K must be an integer") from exc
         if top_k < 1 or top_k > 100:
             raise ValueError("Top-K must be between 1 and 100")
-        # Stage2 / Stage3 共用同一目标 Top-K
+        # Stage2 / Stage3 share the same target Top-K
         updates["TOP_K_AFTER_STAGE2"] = str(top_k)
         updates["STAGE3_TOP_K"] = str(top_k)
 
@@ -758,7 +759,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, _session_payload(session, path))
             return
 
-        # 仅调整公式/增删标准与排除规则，不触发 Jev 重排
+        # Only adjust formula / criteria / exclude rules; do not trigger Jev rerank
         if parsed.path == "/api/criteria":
             name = str(payload.get("session_id") or "")
             path = config.OUTPUT_DIR / Path(name).name
@@ -814,7 +815,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(502, {"error": str(exc)})
             return
 
-        # 仅执行池内重排（使用已 Apply 的标准与规则）
+        # In-pool rerank only (using already-applied criteria and rules)
         if parsed.path == "/api/rerank":
             name = str(payload.get("session_id") or "")
             path = config.OUTPUT_DIR / Path(name).name

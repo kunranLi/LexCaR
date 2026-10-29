@@ -1,9 +1,9 @@
-"""DMXAPI 客户端：Jev TypeSafe 判研 + 轻量 LLM Chat。
+"""DMXAPI client: Jev TypeSafe judgment + light LLM chat.
 
-文档参考：
-- 通用中转：https://www.dmxapi.cn/rmb
-- Jev：https://doc.dmxapi.cn/jev-1.13.0-typesafe-structured-judgment.html
-- Chat：https://www.dmxapi.cn/v1/chat/completions
+Docs:
+- Gateway overview: https://www.dmxapi.cn/rmb
+- Jev: https://doc.dmxapi.cn/jev-1.13.0-typesafe-structured-judgment.html
+- Chat: https://www.dmxapi.cn/v1/chat/completions
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ import config
 
 @dataclass
 class JevAnswer:
-    """单个 Jev 问题的结构化答案。"""
+    """Structured answer for one Jev question."""
 
     question_id: str
     type: str
@@ -33,7 +33,7 @@ class JevAnswer:
 
     @property
     def probability(self) -> float:
-        """统一取出「成立/是」概率，便于加权重排。"""
+        """Return the yes/established probability for weighted rerank."""
         if self.noul is not None:
             return float(self.noul)
         if self.probabilities and self.choice is not None:
@@ -59,7 +59,7 @@ class DmxClient:
         self.base_url = (base_url or config.DMX_BASE_URL).rstrip("/")
         self.jev_model = jev_model or config.JEV_MODEL
         self.llm_model = llm_model or config.LLM_MODEL
-        # timeout 为兼容旧参数；优先使用显式 jev_timeout / llm_timeout
+        # timeout is legacy; prefer explicit jev_timeout / llm_timeout
         default_timeout = timeout if timeout is not None else config.JEV_TIMEOUT
         self.jev_timeout = (
             jev_timeout if jev_timeout is not None else default_timeout
@@ -67,7 +67,7 @@ class DmxClient:
         self.llm_timeout = (
             llm_timeout if llm_timeout is not None else config.LLM_TIMEOUT
         )
-        self.timeout = self.jev_timeout  # 兼容外部若仍读 .timeout
+        self.timeout = self.jev_timeout  # compat if callers still read .timeout
         self.max_retries = (
             max_retries if max_retries is not None else config.DMX_MAX_RETRIES
         )
@@ -87,7 +87,7 @@ class DmxClient:
         questions: Dict[str, Dict[str, Any]],
         model: Optional[str] = None,
     ) -> Dict[str, JevAnswer]:
-        """调用 jev-1.13.0 TypeSafe 接口，一次请求回答多个结构化问题。"""
+        """Call jev-1.13.0 TypeSafe API; answer multiple structured questions in one request."""
         url = f"{self.base_url}/typesafe/v1/systemone"
         payload = {
             "model": model or self.jev_model,
@@ -110,7 +110,7 @@ class DmxClient:
         return answers
 
     def jev_noul(self, state: Union[str, Dict[str, Any]], instructions: str) -> float:
-        """便捷：单个 Boolean（noul）判定，返回 [0,1] 概率。"""
+        """Convenience: single Boolean (noul) judgment; returns probability in [0, 1]."""
         answers = self.jev_judge(
             state=state,
             questions={"q": {"type": "noul", "instructions": instructions}},
@@ -126,7 +126,7 @@ class DmxClient:
         max_tokens: int = 2048,
         response_format: Optional[Dict[str, Any]] = None,
     ) -> str:
-        """OpenAI 兼容 Chat Completions。"""
+        """OpenAI-compatible Chat Completions."""
         url = f"{self.base_url}/v1/chat/completions"
         payload: Dict[str, Any] = {
             "model": model or self.llm_model,
@@ -145,8 +145,8 @@ class DmxClient:
         model: Optional[str] = None,
         temperature: float = 0.2,
     ) -> Any:
-        """要求模型返回 JSON，并解析为 Python 对象。"""
-        # 尽量使用 json_object；部分模型不支持时回退到普通 chat + 手工解析
+        """Require JSON from the model and parse it into a Python object."""
+        # Prefer json_object; fall back to plain chat + manual parse when unsupported
         try:
             content = self.chat(
                 messages=messages,
@@ -186,7 +186,7 @@ class DmxClient:
         text = text.strip()
         if text.startswith("```"):
             lines = text.splitlines()
-            # 去掉 ```json / ``` 围栏
+            # Strip ```json / ``` fences
             if lines and lines[0].startswith("```"):
                 lines = lines[1:]
             if lines and lines[-1].strip() == "```":

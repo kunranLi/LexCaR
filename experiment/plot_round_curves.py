@@ -17,8 +17,8 @@ import numpy as np
 ROUNDS = ["R1", "R2", "R3"]
 LABEL_LEX = "LexCaR"
 LABEL_BASELINE = "traditional agentic retrieval"
-COLOR_LEX = "#7dd3fc"  # powder blue (粉蓝)
-COLOR_MCP = "#e9a8f0"  # powder pink-purple (粉紫)
+COLOR_LEX = "#7dd3fc"  # powder blue
+COLOR_MCP = "#e9a8f0"  # powder pink-purple
 
 # Larger + bold text for paper figures
 FS_TITLE = 15

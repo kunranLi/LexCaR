@@ -1,4 +1,4 @@
-"""全局配置：从环境变量 / .env 读取。"""
+"""Global config loaded from environment variables / .env."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def _resolve_path(value: str, default: Path) -> Path:
 
 
 def _env_text(key: str, default: str) -> str:
-    """读取多行文本：支持 .env 里用 \\n 转义。"""
+    """Read multi-line text; supports \\n escapes in .env."""
     raw = os.getenv(key)
     if raw is None or raw.strip() == "":
         return default
@@ -45,7 +45,7 @@ def _env_float(key: str, default: float) -> float:
     return float(raw)
 
 
-# 可选：把 HF 缓存钉在 D 盘项目内，避免落到 C:\\Users\\...\\.cache
+# Optional: pin HF cache under the project tree instead of C:\\Users\\...\\.cache
 _hf_home = os.getenv("HF_HOME", "").strip()
 if _hf_home:
     hf_home = _resolve_path(_hf_home, ROOT_DIR / "models" / ".hf_home")
@@ -58,7 +58,7 @@ DMX_BASE_URL = os.getenv("DMX_BASE_URL", "https://www.dmxapi.cn").rstrip("/")
 JEV_MODEL = os.getenv("JEV_MODEL", "jev-1.13.0")
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
-# HTTP 超时（秒）与重试：LLM 共用；Jev 可按阶段覆盖
+# HTTP timeout (seconds) and retries: shared by LLM; Jev may override per stage
 DMX_MAX_RETRIES = _env_int("DMX_MAX_RETRIES", 3)
 LLM_TIMEOUT = _env_int("LLM_TIMEOUT", 90)
 JEV_TIMEOUT = _env_int("JEV_TIMEOUT", 90)
@@ -69,16 +69,16 @@ LECARDV2_DIR = _resolve_path(
     os.getenv("LECARDV2_DIR", ""), ROOT_DIR / "data" / "lecardv2"
 )
 
-# --- Stage1：智能体检索（LLM + 案例检索技能 + MCP）---
+# --- Stage1: agentic retrieval (LLM + case-retrieval skills + MCP) ---
 CANDIDATE_POOL_SIZE = _env_int("CANDIDATE_POOL_SIZE", 50)
 STAGE1_AGENT_MAX_ROUNDS = _env_int("STAGE1_AGENT_MAX_ROUNDS", 3)
 STAGE1_MAX_TOOL_CALLS = _env_int("STAGE1_MAX_TOOL_CALLS", 16)
 STAGE1_MCP_TIMEOUT = _env_int("STAGE1_MCP_TIMEOUT", 60)
 
-# 查询规划 / 原文抽字段的温度
+# Temperature for query planning / field extraction from raw case text
 STAGE1_PLAN_TEMPERATURE = _env_float("STAGE1_PLAN_TEMPERATURE", 0.2)
 STAGE1_EXTRACT_TEMPERATURE = _env_float("STAGE1_EXTRACT_TEMPERATURE", 0.0)
-# 每一轮最多几条语义查询、几条关键词查询
+# Max semantic / keyword queries per planning round
 STAGE1_SEMANTIC_QUERY_COUNT = _env_int("STAGE1_SEMANTIC_QUERY_COUNT", 4)
 STAGE1_KEYWORD_QUERY_COUNT = _env_int("STAGE1_KEYWORD_QUERY_COUNT", 4)
 STAGE1_KEYWORD_MIN_TERMS = _env_int("STAGE1_KEYWORD_MIN_TERMS", 2)
@@ -97,7 +97,7 @@ PROMPT_STAGE1_SKILL_SELECT_SYSTEM = _env_text(
     "用户新增加的技能，只要和类案检索、检索范围、检索式或案例筛选有关，就应当选上。"
     "只输出 JSON。",
 )
-# 占位符：{query} {catalog} {example_json}
+# Placeholders: {query} {catalog} {example_json}
 PROMPT_STAGE1_SKILL_SELECT_USER = _env_text(
     "PROMPT_STAGE1_SKILL_SELECT_USER",
     "【用户案情】\n{query}\n\n"
@@ -116,7 +116,7 @@ PROMPT_STAGE1_PLAN_SYSTEM = _env_text(
     "工具若有类型参数，必须使用 schema 中的全称，不要默认刑事案件。"
     "不要编写任何案例、案号或裁判要旨。只输出 JSON。",
 )
-# 占位符：{query} {tools} {example_json} {max_calls} {semantic_count} {keyword_count} {keyword_min_terms} {keyword_max_terms} {followup}
+# Placeholders: {query} {tools} {example_json} {max_calls} {semantic_count} {keyword_count} {keyword_min_terms} {keyword_max_terms} {followup}
 PROMPT_STAGE1_PLAN_USER = _env_text(
     "PROMPT_STAGE1_PLAN_USER",
     "【用户案情】\n{query}\n\n"
@@ -134,7 +134,7 @@ PROMPT_STAGE1_PLAN_EXAMPLE_JSON = _env_text(
     '{"calls":[{"server":"pkulaw-semantic","tool":"search_case",'
     '"arguments":{"text":"房屋买卖合同解除后已付购房款应否返还","case_type":"民事案件","size":10}}]}',
 )
-# 占位符：{already} {found} {target} {titles}
+# Placeholders: {already} {found} {target} {titles}
 PROMPT_STAGE1_PLAN_FOLLOWUP = _env_text(
     "PROMPT_STAGE1_PLAN_FOLLOWUP",
     "\n\n已经调用过的工具：{already}\n"
@@ -154,21 +154,21 @@ PROMPT_STAGE1_EXTRACT_SYSTEM = _env_text(
 # --- Stage2 ---
 TOP_K_AFTER_STAGE2 = _env_int("TOP_K_AFTER_STAGE2", 10)
 JEV_MAX_WORKERS = _env_int("JEV_MAX_WORKERS", 8)
-# 送 Jev 比对：事实摘要 + 裁判摘要 分段预算（不再从头整段截断）
+# Jev compare budgets: fact summary + adjudication summary (segmented; no whole-text head truncate)
 CASE_FACT_MAX_CHARS = _env_int("CASE_FACT_MAX_CHARS", 1500)
 CASE_ADJUDICATION_MAX_CHARS = _env_int("CASE_ADJUDICATION_MAX_CHARS", 4000)
-# 兼容旧配置：若仍设置 CASE_TEXT_MAX_CHARS，仅作总长度软上限
+# Legacy: if CASE_TEXT_MAX_CHARS is still set, use it only as a soft total-length cap
 CASE_TEXT_MAX_CHARS = _env_int(
     "CASE_TEXT_MAX_CHARS",
     CASE_FACT_MAX_CHARS + CASE_ADJUDICATION_MAX_CHARS,
 )
 QUERY_TEXT_MAX_CHARS = _env_int("QUERY_TEXT_MAX_CHARS", 2500)
-# Stage2.2：喂给 LLM 的先例摘要条数 / 每条事实截断 / 原子问题数量
+# Stage2.2: precedent briefs for LLM / per-brief truncate / atomic question count
 STAGE2_CHECKLIST_TOP_N = _env_int("STAGE2_CHECKLIST_TOP_N", 10)
 STAGE2_CASE_BRIEF_MAX_CHARS = _env_int("STAGE2_CASE_BRIEF_MAX_CHARS", 600)
 STAGE2_CHECKLIST_MIN_QUESTIONS = _env_int("STAGE2_CHECKLIST_MIN_QUESTIONS", 12)
 STAGE2_CHECKLIST_MAX_QUESTIONS = _env_int("STAGE2_CHECKLIST_MAX_QUESTIONS", 18)
-# Stage2.3：成立 / 信息充分 的判定阈值
+# Stage2.3: thresholds for established / information-sufficiency
 STAGE2_FACT_PROB_THRESHOLD = _env_float("STAGE2_FACT_PROB_THRESHOLD", 0.5)
 
 # --- Stage3 ---
@@ -177,7 +177,7 @@ STAGE3_DEFAULT_DIM_WEIGHT = _env_float("STAGE3_DEFAULT_DIM_WEIGHT", 0.3)
 STAGE3_FILTER_THRESHOLD = _env_float("STAGE3_FILTER_THRESHOLD", 0.5)
 STAGE3_LLM_QUERY_MAX_CHARS = _env_int("STAGE3_LLM_QUERY_MAX_CHARS", 1200)
 
-# Stage2.1 / Stage3 预设三维 Jev 判定（JSON 数组，字段：id/name/weight/question）
+# Stage2.1 / Stage3 preset 3-D Jev dimensions (JSON array: id/name/weight/question)
 _DEFAULT_STAGE2_DIMENSIONS = [
     {
         "id": "similar_cause",
@@ -211,11 +211,11 @@ except json.JSONDecodeError:
     STAGE2_DIMENSIONS = _DEFAULT_STAGE2_DIMENSIONS
 
 # ---------------------------------------------------------------------------
-# Stage2 Prompt：LLM 生成预判清单 + Jev 结构化事实判定（均可在 .env 覆盖）
-# 占位符见各常量注释
+# Stage2 prompts: LLM checklist generation + Jev structured fact checks (overridable via .env)
+# See comments on each constant for placeholders
 # ---------------------------------------------------------------------------
 
-# LLM system：仅依据高相关先例裁判部分提炼要件
+# LLM system: extract elements only from high-relevance precedent adjudication text
 PROMPT_LLM_CHECKLIST_SYSTEM = _env_text(
     "PROMPT_LLM_CHECKLIST_SYSTEM",
     "你是中国裁判要件抽取助手。先例可能是刑事、民事、行政或其他案件。"
@@ -233,7 +233,7 @@ PROMPT_LLM_CHECKLIST_SYSTEM = _env_text(
     "不要抽取说理没有讨论的要件来凑数，不要依赖或臆造用户案情；只输出 JSON。",
 )
 
-# LLM user：{top_k} {case_briefs} {example_json} {min_questions} {max_questions}（不含用户案情）
+# LLM user: {top_k} {case_briefs} {example_json} {min_questions} {max_questions} (no user query)
 PROMPT_LLM_CHECKLIST_USER = _env_text(
     "PROMPT_LLM_CHECKLIST_USER",
     "【高相关先例裁判摘要 Top-{top_k}】\n{case_briefs}\n\n"
@@ -249,7 +249,7 @@ PROMPT_LLM_CHECKLIST_USER = _env_text(
     "不要出现对「用户案情」的引用。",
 )
 
-# LLM 输出格式示例（写入 user prompt）
+# LLM output-format example (embedded in user prompt)
 PROMPT_LLM_CHECKLIST_EXAMPLE_JSON = _env_text(
     "PROMPT_LLM_CHECKLIST_EXAMPLE_JSON",
     json.dumps(
@@ -310,7 +310,7 @@ PROMPT_LLM_CHECKLIST_EXAMPLE_JSON = _env_text(
     ),
 )
 
-# LLM 失败时的兜底预判清单（JSON 数组）
+# Fallback checklist when LLM fails (JSON array)
 _DEFAULT_FALLBACK = [
     {
         "id": "q1",
@@ -349,27 +349,27 @@ try:
 except json.JSONDecodeError:
     PROMPT_LLM_CHECKLIST_FALLBACK = _DEFAULT_FALLBACK
 
-# --- Jev：Stage2.3 对本案预判清单做结构化事实判定 ---
-# state 占位符：{query}
+# --- Jev: Stage2.3 structured fact checks against the query checklist ---
+# state placeholders: {query}
 PROMPT_JEV_FACT_STATE = _env_text(
     "PROMPT_JEV_FACT_STATE",
     "【本案案情】\n{query}\n\n请严格依据上述案情作答，不要臆造未出现的事实。",
 )
 
-# Jev noul：要件成立概率，{question}
+# Jev noul: probability that the element is established; {question}
 PROMPT_JEV_FACT_ESTABLISHED = _env_text(
     "PROMPT_JEV_FACT_ESTABLISHED",
     "仅根据本案案情判断：{question} 若信息不足以判断，请倾向于给出较低概率。",
 )
 
-# Jev noul：信息充分性概率，{question}
+# Jev noul: probability that the query text has enough info; {question}
 PROMPT_JEV_FACT_SUFFICIENCY = _env_text(
     "PROMPT_JEV_FACT_SUFFICIENCY",
     "判断本案案情文本中，是否已提供足够信息来可靠回答：{question}",
 )
 
-# --- Jev：Stage2.1 / Stage3 池内重排时的比对上下文 ---
-# 占位符：{query} {doc_id} {body}
+# --- Jev: compare context for Stage2.1 / Stage3 in-pool rerank ---
+# Placeholders: {query} {doc_id} {body}
 PROMPT_JEV_COMPARE_STATE = _env_text(
     "PROMPT_JEV_COMPARE_STATE",
     "【本案案情】\n{query}\n\n"
@@ -378,14 +378,14 @@ PROMPT_JEV_COMPARE_STATE = _env_text(
     "{body}",
 )
 
-# Stage3：LLM 把用户意图改写成 Jev Boolean 维度问题
+# Stage3: LLM rewrites user intent into a Jev Boolean dimension question
 PROMPT_LLM_STAGE3_DIM_SYSTEM = _env_text(
     "PROMPT_LLM_STAGE3_DIM_SYSTEM",
     "你是法律检索系统中的问题生成器。把用户的检索偏好改写成一个清晰的 "
     "Boolean（是/否）Jev 判定问题，用于比较「本案」与「候选案例」是否匹配该偏好。"
     "只输出 JSON。",
 )
-# 占位符：{query} {user_intent} {existing_questions} {example_json}
+# Placeholders: {query} {user_intent} {existing_questions} {example_json}
 PROMPT_LLM_STAGE3_DIM_USER = _env_text(
     "PROMPT_LLM_STAGE3_DIM_USER",
     "【本案案情】\n{query}\n\n"
@@ -397,13 +397,13 @@ PROMPT_LLM_STAGE3_DIM_EXAMPLE_JSON = _env_text(
     "PROMPT_LLM_STAGE3_DIM_EXAMPLE_JSON",
     '{"id":"dim_focus","name":"争议焦点重合","question":"候选案例是否与用户关注的争议焦点直接相关？"}',
 )
-# LLM 失败时的 Jev 维度问题兜底，占位符：{user_intent}
+# Fallback Jev dimension question when LLM fails; placeholder: {user_intent}
 PROMPT_JEV_STAGE3_DIM_FALLBACK = _env_text(
     "PROMPT_JEV_STAGE3_DIM_FALLBACK",
     "候选案例是否体现用户关注的情节：{user_intent}？",
 )
 
-# Stage3：LLM 把排除意图改写成 Jev Boolean 过滤问题
+# Stage3: LLM rewrites exclude intent into a Jev Boolean filter question
 PROMPT_LLM_STAGE3_FILTER_SYSTEM = _env_text(
     "PROMPT_LLM_STAGE3_FILTER_SYSTEM",
     "你是法律检索系统中的过滤条件生成器。"
@@ -411,7 +411,7 @@ PROMPT_LLM_STAGE3_FILTER_SYSTEM = _env_text(
     "若对候选案例回答「是」，则该案例应被排除。"
     "只输出 JSON。",
 )
-# 占位符：{query} {user_intent} {example_json}
+# Placeholders: {query} {user_intent} {example_json}
 PROMPT_LLM_STAGE3_FILTER_USER = _env_text(
     "PROMPT_LLM_STAGE3_FILTER_USER",
     "【本案案情】\n{query}\n\n"
@@ -422,7 +422,7 @@ PROMPT_LLM_STAGE3_FILTER_EXAMPLE_JSON = _env_text(
     "PROMPT_LLM_STAGE3_FILTER_EXAMPLE_JSON",
     '{"id":"flt_unrelated","name":"排除无关案件","question":"该候选案例是否属于用户声明要排除的案件类型？"}',
 )
-# LLM 失败时的 Jev 过滤问题兜底，占位符：{user_intent}
+# Fallback Jev filter question when LLM fails; placeholder: {user_intent}
 PROMPT_JEV_STAGE3_FILTER_FALLBACK = _env_text(
     "PROMPT_JEV_STAGE3_FILTER_FALLBACK",
     "该候选案例是否属于用户不想要的类型：{user_intent}？",
@@ -430,7 +430,7 @@ PROMPT_JEV_STAGE3_FILTER_FALLBACK = _env_text(
 
 
 def extract_adjudication_text(case: Dict[str, Any], max_chars: int) -> str:
-    """提取裁判部分：优先 reason+result；否则从全文截「本院认为」起；再否则取文末。"""
+    """Extract adjudication text: prefer reason+result; else from court-opinion marker; else tail."""
     reason = (case.get("reason") or "").strip()
     result = (case.get("result") or "").strip()
     if reason or result:
@@ -458,7 +458,7 @@ def build_case_body_for_jev(
     adj_max: Optional[int] = None,
     total_max: Optional[int] = None,
 ) -> str:
-    """事实摘要（文首）+ 裁判摘要（本院认为/文末），保证说理进入模型。"""
+    """Fact summary (head) + adjudication summary (court opinion / tail) so reasoning reaches the model."""
     fact_max = CASE_FACT_MAX_CHARS if fact_max is None else fact_max
     adj_max = CASE_ADJUDICATION_MAX_CHARS if adj_max is None else adj_max
     total_max = CASE_TEXT_MAX_CHARS if total_max is None else total_max
@@ -467,7 +467,7 @@ def build_case_body_for_jev(
     fact_part = fact[:fact_max] if fact else ""
     adj_part = extract_adjudication_text(case, adj_max)
 
-    # 裁判段完全落在事实摘要内时去掉（避免短文书重复）
+    # Drop adjudication if it is fully contained in the fact summary (avoid short-doc duplication)
     if fact_part and adj_part and adj_part in fact_part:
         adj_part = ""
 
@@ -484,7 +484,7 @@ def build_case_body_for_jev(
         return ""
     if len(body) <= total_max:
         return body
-    # 超总上限时优先保住裁判摘要，再压缩事实
+    # When over total cap, keep adjudication first, then compress facts
     if adj_part:
         overhead = len(_pack("", adj_part))
         remain = max(0, total_max - overhead - 2)
@@ -495,14 +495,14 @@ def build_case_body_for_jev(
 
 
 def build_jev_compare_state(query: str, case: Dict[str, Any]) -> str:
-    """构造 Stage2.1 / Stage3 共用的本案-候选比对 state。"""
+    """Build shared query–candidate compare state for Stage2.1 / Stage3."""
     body = build_case_body_for_jev(case)
     kwargs: Dict[str, Any] = {
         "query": query[:QUERY_TEXT_MAX_CHARS],
         "doc_id": case.get("doc_id") or "",
         "body": body,
     }
-    # 兼容旧 .env 模板若仍含 {charges}
+    # Compat: older .env templates may still contain {charges}
     if "{charges}" in PROMPT_JEV_COMPARE_STATE:
         kwargs["charges"] = "、".join(case.get("charges") or []) or ""
     return PROMPT_JEV_COMPARE_STATE.format(**kwargs)

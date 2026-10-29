@@ -1,6 +1,6 @@
-"""LexCaR 三阶段流程入口。
+"""LexCaR three-stage pipeline entrypoint.
 
-用法示例：
+Usage examples:
   python pipeline.py --stage all --query "..."
   python pipeline.py --stage 1 --query "..."
   python pipeline.py --stage 2 --session outputs/session_xxx.json
@@ -26,22 +26,22 @@ console = Console()
 
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="LexCaR：以用户为中心、可编辑排序标准的法律案例检索系统"
+        description="LexCaR: user-centered legal case retrieval with editable ranking criteria"
     )
     p.add_argument(
         "--stage",
         choices=["1", "2", "3", "all"],
         default="all",
-        help="运行哪一阶段（all=1→2→3）",
+        help="Which stage to run (all=1→2→3)",
     )
-    p.add_argument("--query", type=str, default="", help="用户案情描述（Stage1/all 必需）")
-    p.add_argument("--qid", type=str, default="", help="使用本地 query.json 中的 query id 作为案情")
-    p.add_argument("--session", type=str, default="", help="已有会话 JSON 路径")
-    p.add_argument("--pool-size", type=int, default=None, help="Stage1 召回条数")
-    p.add_argument("--add-dim", type=str, default="", help="Stage3：新增判断维度（自然语言）")
-    p.add_argument("--dim-weight", type=float, default=0.3, help="新增维度权重")
-    p.add_argument("--exclude", type=str, default="", help="Stage3：排除案例类型（自然语言）")
-    p.add_argument("--demo", action="store_true", help="使用内置样例案情")
+    p.add_argument("--query", type=str, default="", help="User case description (required for Stage1/all)")
+    p.add_argument("--qid", type=str, default="", help="Use a query id from local query.json as the case text")
+    p.add_argument("--session", type=str, default="", help="Path to an existing session JSON")
+    p.add_argument("--pool-size", type=int, default=None, help="Stage1 recall pool size")
+    p.add_argument("--add-dim", type=str, default="", help="Stage3: add a ranking dimension (natural language)")
+    p.add_argument("--dim-weight", type=float, default=0.3, help="Weight for the newly added dimension")
+    p.add_argument("--exclude", type=str, default="", help="Stage3: exclude case type (natural language)")
+    p.add_argument("--demo", action="store_true", help="Use the built-in sample case description")
     return p
 
 
@@ -107,7 +107,7 @@ def main() -> None:
     # -------- Stage 3 --------
     if args.stage in ("3", "all"):
         stage3 = Stage3UserFollow()
-        # 内置刑事样例跑全流程时，演示一次新增要件和排除
+        # When running the built-in criminal demo end-to-end, demo one add-dim and one exclude
         use_demo_follow = args.demo and args.stage == "all" and not args.add_dim and not args.exclude
         add_dim = args.add_dim or (
             "退还赃款/退赃情节对本案很关键，优先保留有退赃的类案" if use_demo_follow else ""
@@ -122,7 +122,7 @@ def main() -> None:
             session = stage3.add_filter(session, user_intent=exclude)
 
         if not add_dim and not exclude:
-            # 仅按当前维度重排一次
+            # Rerank once with the current dimensions only
             session = stage3.rerank(session, note="manual_rerank")
 
     console.print(f"[bold]会话文件[/]: outputs/session_{session.session_id}.json")

@@ -1,8 +1,8 @@
-"""Stage 2：初步经验沉淀。
+"""Stage 2: initial experience distillation.
 
-1) 对候选池用预设三维 Jev Boolean 加权打分，取 Top-10；
-2) 轻量 LLM 读取 Top-10 + 用户 query，自动推导结构化问题；
-3) Jev 依据用户 query 逐一回答，输出「要件成立概率」+「信息充分性概率」。
+1) Score the pool with preset 3-D Jev Boolean weights and keep Top-10;
+2) A light LLM reads Top-10 + user query and derives structured questions;
+3) Jev answers each against the query: established-prob + sufficiency-prob.
 """
 
 from __future__ import annotations
@@ -21,11 +21,11 @@ from stages.session import SessionState
 
 console = Console()
 
-# 判决主文之后的执行、告知事项，不能用来做判决前预判。
+# Post-disposition enforcement / notice items must not be used for pre-judgment checklists.
 _POST_JUDGMENT = re.compile(
     r"判决执行|刑期|折抵|上诉|缴纳罚金|判决生效|罚金于|剥夺政治权利|权利告知|诉讼费"
 )
-# 问句需要点明法律要件，不能只是生活事实。
+# Questions must name a legal element, not merely everyday facts.
 _LEGAL_ELEMENT = re.compile(
     r"要件|罪的|罪中|罪所|案由|手段|目的|加重|从宽|从重|减轻|自首|坦白|立功|"
     r"退赔|退赃|谅解|责任|违约|侵权|违法|职权|过错|因果关系|"
@@ -83,7 +83,7 @@ class Stage2Experience:
         console.print("[bold cyan]Stage2.3[/] Jev 确认事实（成立概率 + 信息充分性）...")
         facts = self.confirm_facts(session.query, questions)
         session.confirmed_facts = facts
-        # 将预设维度写入 active_dimensions，供 Stage3 继续迭代
+        # Persist preset dimensions into active_dimensions for Stage3 iteration
         session.active_dimensions = [
             {
                 "id": d["id"],
@@ -138,7 +138,7 @@ class Stage2Experience:
         query: str,
         top_cases: List[Dict[str, Any]],
     ) -> List[Dict[str, str]]:
-        # query 保留参数以兼容调用方；预判清单不再喂入用户案情
+        # Keep query for API compatibility; checklist generation no longer feeds user case text
         _ = query
         n = min(self.checklist_top_n, len(top_cases))
         case_briefs = []
@@ -209,8 +209,8 @@ class Stage2Experience:
         query: str,
         questions: List[Dict[str, str]],
     ) -> List[Dict[str, Any]]:
-        """对每个结构化问题，用两个 noul 分别估成立概率与信息充分性。"""
-        # 一次请求打包所有问题，降低调用次数；指令模板来自 .env
+        """For each structured question, estimate established and sufficiency probs via two nouls."""
+        # Pack all questions into one request to cut call count; instruction templates come from .env
         jev_questions: Dict[str, Dict[str, Any]] = {}
         for q in questions:
             qid = q["id"]
@@ -243,8 +243,8 @@ class Stage2Experience:
             info_sufficient = bool(
                 suf and suf.probability >= self.fact_prob_threshold
             )
-            # 信息充分且成立→成立；充分但不成立→不成立；信息不充分→未知
-            # 使用 ASCII 标记：Windows GBK 控制台无法编码 ✓/✗，会导致 Stage2 中断
+            # Sufficient+established → yes; sufficient+not → no; insufficient info → unknown
+            # Use ASCII markers: Windows GBK consoles cannot encode ✓/✗ and would abort Stage2
             if not info_sufficient:
                 verdict = "unknown"
                 mark = "?"
@@ -340,7 +340,7 @@ def _is_vague_element(question: Dict[str, str]) -> bool:
 
 
 def _is_compound_element(question: Dict[str, str]) -> bool:
-    """一个问句里用连词或逗号绑了第二个事实。"""
+    """True if a question binds a second fact with a conjunction or comma."""
     text = question.get("question") or ""
     if text.count("是否") > 1:
         return True

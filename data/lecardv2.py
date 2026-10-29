@@ -1,11 +1,11 @@
-"""LeCaRDv2 数据加载。
+"""LeCaRDv2 data loader.
 
-支持三种数据源（按优先级）：
-1. 官方本地目录：query.json + candidates/*.json（或 candidates.jsonl）
-2. HuggingFace mteb/LeCaRDv2 子集（便于快速体验）
-3. 内置 demo 样例（无网 / 无数据时跑通流水线）
+Three sources (by priority):
+1. Official local dir: query.json + candidates/*.json (or candidates.jsonl)
+2. HuggingFace mteb/LeCaRDv2 subset (quick demo)
+3. Built-in demo samples (offline / no data)
 
-官方仓库：https://github.com/THUIR/LeCaRDv2
+Upstream: https://github.com/THUIR/LeCaRDv2
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ _TITLE_RE = re.compile(
 
 
 def extract_case_title(text: str, max_len: int = 80) -> str:
-    """从文书正文开头抽取案名标题（HF 子集 title 字段原本为空）。"""
+    """Extract case title from the start of the judgment text (HF subset titles are empty)."""
     text = (text or "").strip()
     if not text:
         return ""
@@ -48,7 +48,7 @@ class CaseRecord:
     meta: Dict = field(default_factory=dict)
 
     def retrieval_text(self, max_chars: Optional[int] = None) -> str:
-        """用于稠密检索的文本：事实优先，辅以理由/结果。"""
+        """Text for dense retrieval: facts first, then reason/result."""
         parts = [p for p in [self.fact, self.reason, self.result, self.fulltext] if p]
         text = "\n".join(parts) if parts else ""
         if max_chars and len(text) > max_chars:
@@ -61,8 +61,8 @@ class CaseRecord:
         max_case_chars: Optional[int] = None,
         max_query_chars: Optional[int] = None,
     ) -> str:
-        """构造 Jev 共享上下文：本案 + 候选案例（事实摘要+裁判摘要）。"""
-        _ = max_case_chars  # 长度由 config 分段预算控制
+        """Build Jev shared context: query + candidate (fact + adjudication summaries)."""
+        _ = max_case_chars  # length controlled by config segment budgets
         max_query_chars = max_query_chars or config.QUERY_TEXT_MAX_CHARS
         return config.build_jev_compare_state(
             query_text[:max_query_chars],
@@ -155,7 +155,7 @@ class LeCaRDv2Corpus:
                         "fact": obj.get("fact") or "",
                     }
 
-        # candidates 目录（每文件一个 json）或 jsonl
+        # candidates directory (one json per file) or jsonl
         cand_dir = self.data_dir / "candidates"
         jsonl_path = self.data_dir / "candidates.jsonl"
         corpus_jsonl = self.data_dir / "corpus.jsonl"
@@ -197,7 +197,7 @@ class LeCaRDv2Corpus:
                         obj = json.loads(line)
                     except json.JSONDecodeError:
                         continue
-                    # HF/MTEB 风格：_id / title / text
+                    # HF/MTEB style: _id / title / text
                     doc_id = str(obj.get("_id") or obj.get("id") or obj.get("pid") or "")
                     text = obj.get("text") or obj.get("fact") or ""
                     if not doc_id or not text:
@@ -220,7 +220,7 @@ class LeCaRDv2Corpus:
             )
 
     def _load_hf(self, max_candidates: Optional[int] = None) -> None:
-        """加载 HuggingFace mteb/LeCaRDv2（子集，适合 demo）。"""
+        """Load HuggingFace mteb/LeCaRDv2 (subset; good for demos)."""
         from datasets import load_dataset
 
         self.source = "huggingface:mteb/LeCaRDv2"
@@ -248,7 +248,7 @@ class LeCaRDv2Corpus:
             }
 
     def _load_demo(self) -> None:
-        """内置极小样例，保证无数据也能跑通 Stage 流程。"""
+        """Tiny built-in samples so stages run without external data."""
         self.source = "builtin-demo"
         demo_cases = [
             {

@@ -1,4 +1,4 @@
-"""MCP Streamable HTTP 客户端：握手后调用 tools/call。"""
+"""MCP Streamable HTTP client: handshake then tools/call."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ class McpHttpError(RuntimeError):
 
 
 class McpHttpClient:
-    """连接一个 Streamable HTTP MCP 服务并调用工具。"""
+    """Connect to one Streamable HTTP MCP server and invoke tools."""
 
     def __init__(
         self,
@@ -62,7 +62,7 @@ class McpHttpClient:
         return result
 
     def list_tools(self) -> list:
-        """MCP tools/list，返回工具名、说明和 inputSchema。"""
+        """MCP tools/list; returns tool name, description, and inputSchema."""
         self._ensure_initialized()
         tools: list = []
         cursor: Optional[str] = None
@@ -196,7 +196,7 @@ def _parse_http_body(resp: requests.Response) -> Dict[str, Any]:
 
 def _parse_sse(text: str) -> list:
     messages = []
-    # 只按 CR/LF 切行。splitlines() 会把 JSON 字符串里的 Unicode 换行符切断。
+    # Split only on CR/LF. splitlines() would break on Unicode newlines inside JSON strings.
     for block in re.split(r"\r\n\r\n|\n\n|\r\r", text):
         data_lines = []
         for line in re.split(r"\r\n|\n|\r", block):
@@ -233,5 +233,5 @@ def _is_fatal(text: str) -> bool:
 
 
 def _looks_like_cases(text: str) -> bool:
-    """额度类字样若出现在案例正文里，不要误判成鉴权失败。"""
+    """Do not treat quota-like wording inside case text as an auth failure."""
     return "案号" in text or "本院认为" in text or "判决书" in text

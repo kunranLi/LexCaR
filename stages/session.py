@@ -1,4 +1,4 @@
-"""会话状态：候选池只建一次，后续阶段读写同一 JSON。"""
+"""Session state: build the candidate pool once; later stages read/write the same JSON."""
 
 from __future__ import annotations
 

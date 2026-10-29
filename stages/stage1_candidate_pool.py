@@ -1,6 +1,6 @@
-"""Stage 1：候选池搭建。
+"""Stage 1: candidate pool construction.
 
-用户输入案情 → 大模型按案例检索技能拆查询 → MCP 案例库召回指定条数。
+User case text → LLM plans queries via case-retrieval skills → MCP recall of N cases.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ class Stage1CandidatePool:
         session: Optional[SessionState] = None,
         on_progress: Optional[Callable[[str], None]] = None,
     ) -> SessionState:
-        """按案情检索，把指定条数的候选写入会话。"""
+        """Retrieve by case text and write N candidates into the session."""
         if on_progress is not None:
             self.retriever._on_progress = on_progress
         result = self.retriever.search(query)

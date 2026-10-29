@@ -1,4 +1,4 @@
-"""三阶段 Pipeline：Stage1 候选池 → Stage2 经验沉淀 → Stage3 用户跟随。"""
+"""Three-stage pipeline: Stage1 candidate pool → Stage2 experience → Stage3 user follow."""
 
 from .stage1_candidate_pool import Stage1CandidatePool
 from .stage2_experience import Stage2Experience

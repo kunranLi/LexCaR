@@ -1,4 +1,4 @@
-"""Stage1 智能体检索：LLM 按案例检索技能拆查询，MCP 召回并去重。"""
+"""Stage1 agentic retrieval: LLM plans queries via skills; MCP recall + dedupe."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ class AgenticSearchResult:
 
 
 class AgenticRetriever:
-    """按用户案情检索，召回条数由 pool_size 指定。"""
+    """Retrieve by user case text; recall size is pool_size."""
 
     def __init__(
         self,

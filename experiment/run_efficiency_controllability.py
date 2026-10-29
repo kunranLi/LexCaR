@@ -85,7 +85,7 @@ class CountingClient(DmxClient):
 
 @dataclass
 class UnitPrices:
-    # MCP: 北大法宝按次估计 ¥0.25；LLM/Jev: 按 DMXAPI 量级折成单次
+    # MCP: PKULaw ~¥0.25/call estimate; LLM/Jev: amortized per call at DMXAPI scale
     mcp: float = 0.25
     llm: float = 0.005
     jev: float = 0.002

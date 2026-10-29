@@ -1,4 +1,4 @@
-"""交互式 Demo：分阶段推进；Stage3 可实时查看/批量调整检索要件与权重。"""
+"""Interactive demo: advance stage by stage; Stage3 can view/batch-edit criteria and weights."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ console = Console()
 
 
 def _parse_weight_map(raw: str) -> dict:
-    """解析权重：JSON 对象，或 id=0.3,id2=0.5。"""
+    """Parse weights: a JSON object, or id=0.3,id2=0.5."""
     raw = raw.strip()
     if not raw:
         return {}
@@ -38,7 +38,7 @@ def _parse_weight_map(raw: str) -> dict:
 
 
 def _parse_name_list(raw: str) -> list:
-    """逗号/分号分隔的名称列表。"""
+    """Comma/semicolon-separated name list."""
     return [
         x.strip()
         for x in raw.replace("；", ",").replace(";", ",").split(",")

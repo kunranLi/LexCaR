@@ -1,9 +1,9 @@
-"""Stage 3：用户跟随。
+"""Stage 3: user-steered follow-up.
 
-在同一候选池内：
-- 新增/批量上传检索要件（维度）并动态调整权重公式
-- 排除不想要的案例类型 → Jev Boolean 过滤
-不重新做 dense retrieval。
+Within the same candidate pool:
+- Add / bulk-upload ranking criteria (dimensions) and adjust the weight formula
+- Exclude unwanted case types → Jev Boolean filters
+Does not re-run dense retrieval.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ class Stage3UserFollow:
 
     # ----------------------------------------------------------- public API
     def ensure_dimensions(self, session: SessionState) -> SessionState:
-        """无维度时回退到 Stage2 预设三维。"""
+        """Fall back to Stage2 preset three dimensions when none are active."""
         if not session.active_dimensions:
             session.active_dimensions = [
                 {**d, "source": "preset"} for d in config.STAGE2_DIMENSIONS
@@ -48,7 +48,7 @@ class Stage3UserFollow:
         return session
 
     def print_status(self, session: SessionState) -> None:
-        """实时展示当前检索要件、归一化权重与打分公式。"""
+        """Show current criteria, normalized weights, and the scoring formula."""
         self.ensure_dimensions(session)
         dims = session.active_dimensions
         filters = session.filter_rules
@@ -114,7 +114,7 @@ class Stage3UserFollow:
         *,
         rerank: bool = True,
     ) -> SessionState:
-        """根据用户自然语言意图，新增一个 Jev Boolean 维度。"""
+        """Add one Jev Boolean dimension from the user natural-language intent."""
         if weight is None:
             weight = config.STAGE3_DEFAULT_DIM_WEIGHT
         self.ensure_dimensions(session)
@@ -136,7 +136,7 @@ class Stage3UserFollow:
         *,
         rerank: bool = True,
     ) -> SessionState:
-        """根据用户排除意图，新增过滤条件（Jev 判定为 True 则剔除）。"""
+        """Add a filter from exclude intent (drop candidates when Jev answers True)."""
         if threshold is None:
             threshold = config.STAGE3_FILTER_THRESHOLD
         console.print(f"[bold cyan]Stage3[/] 排除意图: {user_intent}")
@@ -166,7 +166,7 @@ class Stage3UserFollow:
         *,
         rerank: bool = True,
     ) -> SessionState:
-        """批量设置维度原始权重（键为名称，重排时自动归一化）。"""
+        """Batch-set raw dimension weights (keys are names; normalized on rerank)."""
         self.ensure_dimensions(session)
         resolved: Dict[str, float] = {}
         missing: List[str] = []
@@ -200,7 +200,7 @@ class Stage3UserFollow:
         *,
         rerank: bool = True,
     ) -> SessionState:
-        """批量删除检索要件（按名称；名称相同时全部删除）。"""
+        """Batch-delete criteria by name (all matches when names collide)."""
         drop_ids = set(self._resolve_dimension_keys(session, names))
         if not drop_ids:
             raise KeyError(f"未找到维度名称: {', '.join(str(x) for x in names)}")
@@ -235,7 +235,7 @@ class Stage3UserFollow:
         *,
         rerank: bool = True,
     ) -> SessionState:
-        """批量删除排除过滤条件（按名称）。"""
+        """Batch-delete exclude filters by name."""
         drop_ids = set(self._resolve_filter_keys(session, names))
         if not drop_ids:
             raise KeyError(f"未找到过滤名称: {', '.join(str(x) for x in names)}")
@@ -262,7 +262,7 @@ class Stage3UserFollow:
     def _resolve_dimension_keys(
         session: SessionState, keys: Sequence[str]
     ) -> List[str]:
-        """按名称解析维度 id（优先精确匹配名称；找不到再试 id）。"""
+        """Resolve dimension id by name (exact name first, then id)."""
         want = [str(x).strip() for x in keys if str(x).strip()]
         found: List[str] = []
         seen = set()
@@ -288,7 +288,7 @@ class Stage3UserFollow:
     def _resolve_filter_keys(
         session: SessionState, keys: Sequence[str]
     ) -> List[str]:
-        """按名称解析过滤 id（优先名称，再试 id）。"""
+        """Resolve filter id by name (name first, then id)."""
         want = [str(x).strip() for x in keys if str(x).strip()]
         found: List[str] = []
         seen = set()
@@ -318,13 +318,13 @@ class Stage3UserFollow:
         mode: str = "merge",
         rerank: bool = True,
     ) -> SessionState:
-        """批量上传/合并检索要件。
+        """Bulk upload / merge ranking criteria.
 
         mode:
-          - merge：按 id 覆盖或追加
-          - replace：用本次列表整体替换当前维度
+          - merge: upsert by id
+          - replace: replace the active dimension list entirely
 
-        每项可含 id/name/weight/question；若只有 intent/user_intent，则走 LLM 生成问题。
+        Each item may include id/name/weight/question; if only intent/user_intent, LLM generates the question.
         """
         if mode not in {"merge", "replace"}:
             raise ValueError("mode 只能是 merge 或 replace")
@@ -357,7 +357,7 @@ class Stage3UserFollow:
         mode: str = "merge",
         rerank: bool = True,
     ) -> SessionState:
-        """从 JSON 文件批量上传维度（数组，或 {{"dimensions":[...]}}）。"""
+        """Bulk-load dimensions from a JSON file (array, or {{"dimensions":[...]}})."""
         path = Path(path)
         data = json.loads(path.read_text(encoding="utf-8"))
         if isinstance(data, dict):
@@ -399,7 +399,7 @@ class Stage3UserFollow:
             state = config.build_jev_compare_state(session.query, case)
             answers = self.client.jev_judge(state=state, questions=all_questions)
 
-            # 过滤：若「应排除」概率 >= threshold，则丢弃
+            # Filter: drop if exclude-probability >= threshold
             for fr in filters:
                 prob = answers[fr["id"]].probability if fr["id"] in answers else 0.0
                 if prob >= float(
@@ -522,7 +522,7 @@ class Stage3UserFollow:
     def _coerce_dimension_item(
         self, session: SessionState, raw: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """把上传项规范为维度 dict；缺 question 时用 intent 调 LLM。"""
+        """Normalize an upload item into a dimension dict; LLM-fill question from intent if missing."""
         intent = str(raw.get("user_intent") or raw.get("intent") or "").strip()
         question = str(raw.get("question") or "").strip()
         weight = float(
@@ -556,7 +556,7 @@ class Stage3UserFollow:
     def _upsert_dimension(
         session: SessionState, dim: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """按 id 覆盖已有维度，否则追加。"""
+        """Upsert a dimension by id, else append."""
         dim_id = str(dim["id"])
         for i, old in enumerate(session.active_dimensions):
             if str(old["id"]) == dim_id:

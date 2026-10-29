@@ -1,4 +1,4 @@
-"""从 skills/ 加载技能。新增一个带说明的 SKILL.md，检索智能体就可以选用。"""
+"""Load skills from skills/. Adding a SKILL.md with a description makes it selectable."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class SkillSpec:
 
 
 def load_skills(directory: Optional[Path] = None) -> List[SkillSpec]:
-    """读取 skills/<名称>/SKILL.md。目录名以 _ 开头的示例不加载。"""
+    """Read skills/<name>/SKILL.md. Directories whose names start with _ are skipped."""
     folder = directory or (config.ROOT_DIR / "skills")
     if not folder.is_dir():
         return []
