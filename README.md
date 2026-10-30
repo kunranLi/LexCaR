@@ -8,7 +8,7 @@
 
 <div align="center">
 
-[![Conference](https://img.shields.io/badge/ECIR-2027%20Demo-3a5a8c.svg?style=flat-square)](https://github.com/kunranLi/LexCaR)
+
 [![Python](https://img.shields.io/badge/Python-3.10+-5b606b.svg?style=flat-square)](https://www.python.org/)
 [![Stages](https://img.shields.io/badge/Pipeline-3%20stages-b5462f.svg?style=flat-square)](#-method--three-stages)
 [![License](https://img.shields.io/badge/License-MIT-9aa0ab.svg?style=flat-square)](./LICENSE)
