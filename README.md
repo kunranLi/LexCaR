@@ -158,8 +158,8 @@ LexCaR/
 ### Requirements
 
 - Python 3.10+
-- [DMXAPI](https://www.dmxapi.cn) key for LLM + Jev (`DMX_API_KEY`)
-- Optional MCP tokens for PKULaw / Wolters Kluwer case search
+- API key for LLM + Jev
+- Optional MCP tokens for case search
 
 ### Installation
 
