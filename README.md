@@ -210,7 +210,6 @@ Configuration lives in `.env` (from `.env.example`). MCP endpoints under `mcp/` 
 ```bibtex
 @inproceedings{lexcar2027,
   title     = {{LexCaR}: User-Centered Legal Case Retrieval with Editable Ranking Criteria},
-  booktitle = {Proceedings of the 49th European Conference on Information Retrieval ({ECIR} 2027), Demo Track},
   year      = {2027},
   note      = {Code and live demo: \url{https://github.com/kunranLi/LexCaR}},
 }
