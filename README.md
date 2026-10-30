@@ -104,7 +104,7 @@ Given a query case, LexCaR constructs a candidate pool from external legal case 
 2. **Legal issue extraction** — An LLM analyzes judicial reasoning of top-ranked cases and produces a checklist of atomic legal issues.
 3. **Query-case assessment** — For each issue, Jev judges whether it is established by the query facts and whether the query text is sufficient (yes / no / unknown).
 
-### Stage 3 · User-Steered Reranking
+### Stage 3 · User-Centered Reranking
 
 Users edit the ranking specification (add/remove criteria, adjust weights, define exclusion rules). The candidate pool is reused; Jev re-evaluates active criteria at each rerank, and LexCaR shows the updated ranking with per-criterion contributions.
 
