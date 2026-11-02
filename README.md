@@ -4,9 +4,9 @@
 
 <br>
 
-<video src="./assets/demo.mp4" width="100%" controls playsinline>
-  <a href="./assets/demo.mp4">LexCaR demo video</a>
-</video>
+[![LexCaR Demo](./assets/demo-poster.jpg)](./assets/demo.mp4)
+
+**[▶ Watch demo (full quality)](./assets/demo.mp4)**
 
 </div>
 
