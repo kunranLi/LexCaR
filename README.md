@@ -2,6 +2,12 @@
 
 <img src="./assets/banner.png" alt="LexCaR — User-Centered Legal Case Retrieval with Editable Ranking Criteria" width="100%">
 
+<br>
+
+<video src="./assets/demo.mp4" width="100%" controls playsinline>
+  <a href="./assets/demo.mp4">LexCaR demo video</a>
+</video>
+
 </div>
 
 <br>
@@ -145,7 +151,7 @@ LexCaR/
 ├── experiment/              # Efficiency / controllability scripts & results
 ├── web/                     # Frontend
 ├── figures/                 # Paper figures & UI assets
-├── assets/                  # README banner (PNG) & dividers
+├── assets/                  # README banner, demo video & dividers
 ├── .env.example             # Configuration template
 ├── requirements.txt
 └── LICENSE
