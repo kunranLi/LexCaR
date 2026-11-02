@@ -4,9 +4,9 @@
 
 <br>
 
-[![LexCaR Demo](./assets/demo-poster.jpg)](./assets/demo.mp4)
+[![LexCaR Demo](./assets/demo-poster.jpg)](https://cdn.jsdelivr.net/gh/kunranLi/LexCaR@main/assets/demo-player.html)
 
-**[▶ Watch demo (full quality)](./assets/demo.mp4)**
+**[▶ Watch demo online](https://cdn.jsdelivr.net/gh/kunranLi/LexCaR@main/assets/demo-player.html)** · [download mp4](./assets/demo.mp4)
 
 </div>
 

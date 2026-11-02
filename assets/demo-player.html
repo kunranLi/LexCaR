@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LexCaR Demo</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.25rem;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0f1218;
+      color: #e8eaed;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    video {
+      width: min(1120px, 100%);
+      max-height: calc(100vh - 6rem);
+      background: #000;
+      border-radius: 8px;
+    }
+    a { color: #9db7ff; }
+  </style>
+</head>
+<body>
+  <h1>LexCaR Demo</h1>
+  <video controls playsinline preload="metadata"
+    src="https://cdn.jsdelivr.net/gh/kunranLi/LexCaR@main/assets/demo.mp4">
+    Your browser does not support HTML video.
+    <a href="https://cdn.jsdelivr.net/gh/kunranLi/LexCaR@main/assets/demo.mp4">Open the video</a>
+  </video>
+  <p><a href="https://github.com/kunranLi/LexCaR">Back to LexCaR</a></p>
+</body>
+</html>
